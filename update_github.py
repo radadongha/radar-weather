@@ -8,6 +8,25 @@ source_folder = r'D:/WinSCP/RADA'
 repo_folder = r'C:/Users/kttv/Desktop/radar-weather'
 target_subfolder = 'rada'
 
+import time  # cần thêm ở đầu nếu chưa có
+
+# --- Xoá ảnh cũ trong thư mục 'rada' quá 1 ngày ---
+now = time.time()
+deleted = 0
+
+for file in os.listdir(os.path.join(repo_folder, target_subfolder)):
+    if file.endswith('.jpg'):
+        file_path = os.path.join(repo_folder, target_subfolder, file)
+        if os.path.isfile(file_path):
+            age_seconds = now - os.path.getmtime(file_path)
+            if age_seconds > 24 * 3600:  # quá 1 ngày
+                os.remove(file_path)
+                deleted += 1
+
+if deleted:
+    print(f"🗑️ Đã xoá {deleted} ảnh cũ quá 1 ngày.")
+
+
 # --- Tìm ảnh mới nhất ---
 jpg_files = [f for f in os.listdir(source_folder) if f.endswith('.jpg')]
 jpg_files.sort(reverse=True)
