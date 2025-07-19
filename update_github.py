@@ -5,7 +5,7 @@ import subprocess
 
 # === Cấu hình ===
 SOURCE_FOLDER = "D:/WinSCP/RADA"  # Giữ nguyên thư mục ảnh nguồn trong WinSCP
-TARGET_FOLDER = "C:/Users/kttv/Desktop/radar-weather/rada"  # Thư mục ảnh radar trong repo GitHub
+TARGET_FOLDER = "C:/Users/kttv/Desktop/radar-weather/docs"  # Thư mục ảnh radar trong repo GitHub
 REPO_FOLDER = "C:/Users/kttv/Desktop/radar-weather"  # Thư mục gốc repo
 
 # === 1. Tìm và copy ảnh radar mới nhất ===
