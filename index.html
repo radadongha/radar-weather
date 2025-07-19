@@ -12,15 +12,16 @@
 </head>
 <body>
   <h1>Ảnh Radar Thời Tiết Mới Nhất</h1>
-  <img id="radar" src="radar_images/radar_202507191100.jpg" alt="Radar Image">
-  <div id="timestamp">Cập nhật lúc: 11:00</div>
+<img src="radar_images/latest.png" alt="Radar thời tiết mới nhất">
+<p id="timestamp">Cập nhật: <span id="update-time"></span></p>
 
-  <!-- Tự động tải lại ảnh sau 10 phút -->
-  <script>
-    setInterval(() => {
-      const img = document.getElementById("radar");
-      img.src = "radar_images/radar_202507191100.jpg?cache=" + new Date().getTime();
-    }, 10 * 60 * 1000); // 10 phút
-  </script>
+<script>
+  // Thêm dấu thời gian để trình duyệt không dùng ảnh cũ
+  const img = document.querySelector("img");
+  const now = new Date();
+  const timestamp = now.toLocaleString("vi-VN");
+  img.src += "?t=" + now.getTime();  // thêm chuỗi t=time để ép tải mới
+  document.getElementById("update-time").textContent = timestamp;
+</script>
 </body>
 </html>
