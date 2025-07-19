@@ -1,72 +1,75 @@
-﻿import os
-import shutil
-from datetime import datetime, timedelta
+import os
+import subprocess
+import datetime
+import configparser
 
-# Cấu hình thư mục
-SOURCE_FOLDER = "RARA"
-DEST_FOLDER = "rada"
-MAX_FILE_AGE_DAYS = 1
+# Đọc cấu hình
+config = configparser.ConfigParser()
+config.read("config.ini", encoding="utf-8")
+SOURCE_FOLDER = config["paths"]["source_folder"]
 
-# Tìm file ảnh mới nhất trong thư mục nguồn
-def get_latest_file(folder):
-    files = [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith('.jpg')]
-    if not files:
-        return None
-    latest = max(files, key=os.path.getmtime)
-    return latest
+# Lấy danh sách ảnh và sắp xếp theo thời gian sửa đổi (mới nhất trước)
+def get_image_files(folder):
+    files = [f for f in os.listdir(folder) if f.lower().endswith((".jpg", ".png", ".gif"))]
+    return sorted(files, key=lambda f: os.path.getmtime(os.path.join(folder, f)), reverse=True)
 
-# Xóa ảnh cũ hơn X ngày
-def delete_old_files(folder, max_age_days):
-    now = datetime.now()
-    deleted = 0
+# Xóa ảnh cũ hơn 1 ngày
+def delete_old_images(folder, days=1):
+    now = datetime.datetime.now()
     for filename in os.listdir(folder):
-        filepath = os.path.join(folder, filename)
-        if os.path.isfile(filepath):
-            file_time = datetime.fromtimestamp(os.path.getmtime(filepath))
-            if (now - file_time).days >= max_age_days:
-                os.remove(filepath)
-                deleted += 1
-    return deleted
+        file_path = os.path.join(folder, filename)
+        if os.path.isfile(file_path):
+            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+            if (now - mtime).days >= days:
+                os.remove(file_path)
+                print(f"Đã xóa ảnh cũ: {filename}")
 
-# Copy file mới vào thư mục rada/
-def copy_new_file():
-    latest = get_latest_file(SOURCE_FOLDER)
-    if not latest:
-        print("⚠️ Không tìm thấy file ảnh nào trong thư mục RARA.")
-        return None
+# Cập nhật index.html để hiển thị ảnh mới nhất
+def update_index_html(latest_image):
+    now = datetime.datetime.now().strftime("%H:%M:%S %d/%m/%Y")
+    html_content = f"""<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Thời Tiết Đông Hà</title>
+    <meta http-equiv="refresh" content="300">
+    <style>
+        body {{ text-align: center; font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 50px; }}
+        h1 {{ font-size: 2em; color: #111; }}
+        img {{ max-width: 90%; height: auto; border: 3px solid #444; margin-top: 20px; }}
+        .caption {{ margin-top: 10px; font-size: 1rem; color: #666; }}
+    </style>
+</head>
+<body>
+    <h1>Ảnh Radar Thời Tiết Mới Nhất</h1>
+    <img src="{SOURCE_FOLDER}/{latest_image}" alt="Radar thời tiết Đông Hà">
+    <div class="caption">Cập nhật: {now}</div>
+</body>
+</html>"""
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print("Đã cập nhật index.html")
 
-    basename = os.path.basename(latest)
-    dest_path = os.path.join(DEST_FOLDER, basename)
+# Commit và push lên GitHub
+def git_commit_and_push(message):
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", message], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("Đã đẩy lên GitHub thành công.")
+    except subprocess.CalledProcessError as e:
+        print("Lỗi khi chạy lệnh Git:", e)
 
-    if not os.path.exists(DEST_FOLDER):
-        os.makedirs(DEST_FOLDER)
+# ================== CHẠY ==================
 
-    shutil.copy2(latest, dest_path)
-    print(f"✅ Đã copy ảnh mới nhất: {basename}")
-    return basename
+# Xóa ảnh cũ
+delete_old_images(SOURCE_FOLDER)
 
-# Thực hiện git commit & push
-def git_commit_push(filename):
-    os.system("git add rada")
-    commit_msg = f'Update: {filename}'
-    os.system(f'git commit -m "{commit_msg}"')
-
-    # Kéo code mới nhất từ GitHub
-    pull_result = os.system("git pull origin main --rebase")
-    if pull_result != 0:
-        print("⚠️ Gặp lỗi khi git pull. Dừng lại.")
-        return
-
-    push_result = os.system("git push origin main")
-    if push_result == 0:
-        print("🚀 Đã đẩy lên GitHub thành công.")
-    else:
-        print("❌ Lỗi: Không thể đẩy lên GitHub. Có thể do xung đột hoặc chưa xác thực.")
-
-# === CHẠY CHÍNH ===
-if __name__ == "__main__":
-    filename = copy_new_file()
-    if filename:
-        deleted = delete_old_files(DEST_FOLDER, MAX_FILE_AGE_DAYS)
-        print(f"🗑️ Đã xóa {deleted} ảnh cũ.")
-        git_commit_push(filename)
+# Cập nhật file index.html với ảnh mới nhất
+images = get_image_files(SOURCE_FOLDER)
+if not images:
+    print("Không tìm thấy ảnh radar.")
+else:
+    latest = images[0]
+    update_index_html(latest)
+    git_commit_and_push(f"Cập nhật ảnh radar: {latest}")
