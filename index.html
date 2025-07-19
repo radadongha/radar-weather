@@ -1,11 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Ảnh Radar Thời Tiết Mới Nhất</title>
+    <meta http-equiv="refresh" content="300">
+    <style>
+        body { text-align: center; background: #000; color: #fff; }
+        img { max-width: 90vw; max-height: 90vh; }
+    </style>
 </head>
 <body>
-    <h2>Ảnh Radar Thời Tiết Mới Nhất</h2>
-    <img src="rada/dong-ha-mon250719100004.MAX2251.jpg" width="640" height="640">
+    <h2>Ảnh Radar - Tự động cập nhật</h2>
+    <img id="radar" src="rada/dong-ha-mon250719102004.MAX2253.jpg" alt="Radar" />
+    <script>
+        const images = ["rada/dong-ha-mon250719100004.MAX2251.jpg", "rada/dong-ha-mon250719101004.MAX2252.jpg", "rada/dong-ha-mon250719102004.MAX2253.jpg"];
+        let i = 0;
+        setInterval(() => {
+            document.getElementById("radar").src = images[i % images.length];
+            i++;
+        }, 1000);
+    </script>
 </body>
 </html>
