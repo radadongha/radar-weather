@@ -11,17 +11,17 @@
   </style>
 </head>
 <body>
-  <h1>Ảnh Radar Thời Tiết Mới Nhất</h1>
-<img src="radar_images/latest.png" alt="Radar thời tiết mới nhất">
+ <h1>Ảnh Radar Thời Tiết Mới Nhất</h1>
+<img src="radar_images/latest.png" alt="Radar thời tiết Đông Hà" style="width: 90%; border: 2px solid #444; margin-top: 20px;">
 <p id="timestamp">Cập nhật: <span id="update-time"></span></p>
 
 <script>
-  // Thêm dấu thời gian để trình duyệt không dùng ảnh cũ
+  // Ép ảnh load mới bằng timestamp để tránh cache
   const img = document.querySelector("img");
   const now = new Date();
-  const timestamp = now.toLocaleString("vi-VN");
-  img.src += "?t=" + now.getTime();  // thêm chuỗi t=time để ép tải mới
-  document.getElementById("update-time").textContent = timestamp;
+  img.src += "?v=" + now.getTime();  // thêm tham số ?v=timestamp
+  document.getElementById("update-time").textContent = now.toLocaleString("vi-VN");
 </script>
+
 </body>
 </html>
