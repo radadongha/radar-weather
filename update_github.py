@@ -65,8 +65,8 @@ def generate_html(image_paths):
     </style>
 </head>
 <body>
-    <h1>🛰️ Radar Thời Tiết</h1>
-    <div id="time">🕒 Giờ radar: {radar_time}</div>
+    <h1>  Radar Thời Tiết</h1>
+    <div id="time"> Giờ radar: {radar_time}</div>
     <img id="radar" src="rada/{image_files[-1]}" alt="Radar">
     <script>
         const images = [{', '.join([f'"rada/{img}"' for img in image_files])}];
