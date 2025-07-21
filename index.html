@@ -1,24 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Ảnh Radar Thời Tiết Mới Nhất</title>
     <meta http-equiv="refresh" content="300">
     <style>
-        body { text-align: center; background: #000; color: #fff; }
-        img { max-width: 90vw; max-height: 90vh; }
+        body {
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        img {
+            max-width: 90vw;
+            height: auto;
+            margin-top: 20px;
+        }
+        #last-updated {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #cccccc;
+        }
     </style>
 </head>
 <body>
     <h2>Ảnh Radar - Tự động cập nhật</h2>
-    <img id="radar" src="rada/dong-ha-mon250721080004.MAX0043.jpg" alt="Radar" />
+    <img id="radar" src="rada/dong-ha-mon250721081004.MAX0044.jpg" alt="Radar" />
+    <p id="last-updated">🕒 Cập nhật: đang tải...</p>
+
     <script>
-        const images = ["rada/dong-ha-mon250721074005.MAX0041.jpg", "rada/dong-ha-mon250721075004.MAX0042.jpg", "rada/dong-ha-mon250721080004.MAX0043.jpg"];
+        const images = ["rada/dong-ha-mon250721075004.MAX0042.jpg", "rada/dong-ha-mon250721080004.MAX0043.jpg", "rada/dong-ha-mon250721081004.MAX0044.jpg"];
         let i = 0;
         setInterval(() => {
             document.getElementById("radar").src = images[i % images.length];
             i++;
         }, 1000);
+
+        fetch("rada/timestamp.txt")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("last-updated").textContent = '🕒 Cập nhật: ' + data.trim();
+            })
+            .catch(err => {
+                document.getElementById("last-updated").textContent = '🕒 Không thể tải thời gian cập nhật';
+            });
     </script>
 </body>
 </html>

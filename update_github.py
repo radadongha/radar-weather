@@ -1,4 +1,4 @@
-﻿import os
+import os
 import shutil
 import subprocess
 import time
@@ -38,22 +38,42 @@ for f in os.listdir(dest_dir):
             deleted += 1
 print(f"🗑️ Đã xóa {deleted} ảnh cũ hơn 1 ngày trong rada/")
 
-# Tạo file index.html hiển thị ảnh dạng loop
+# Ghi file timestamp.txt chứa thời gian cập nhật
+with open(os.path.join(dest_dir, 'timestamp.txt'), 'w', encoding='utf-8') as f:
+    f.write(datetime.now().strftime('%d/%m/%Y %H:%M'))
+
+# Tạo index.html hiển thị radar loop và thời gian cập nhật
 with open(html_file, "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Ảnh Radar Thời Tiết Mới Nhất</title>
     <meta http-equiv="refresh" content="300">
     <style>
-        body {{ text-align: center; background: #000; color: #fff; }}
-        img {{ max-width: 90vw; max-height: 90vh; }}
+        body {{
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }}
+        img {{
+            max-width: 90vw;
+            height: auto;
+            margin-top: 20px;
+        }}
+        #last-updated {{
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #cccccc;
+        }}
     </style>
 </head>
 <body>
     <h2>Ảnh Radar - Tự động cập nhật</h2>
     <img id="radar" src="rada/{latest_images[0]}" alt="Radar" />
+    <p id="last-updated">🕒 Cập nhật: đang tải...</p>
+
     <script>
         const images = [{', '.join(f'"rada/{img}"' for img in reversed(latest_images))}];
         let i = 0;
@@ -61,11 +81,20 @@ with open(html_file, "w", encoding="utf-8") as f:
             document.getElementById("radar").src = images[i % images.length];
             i++;
         }}, 1000);
+
+        fetch("rada/timestamp.txt")
+            .then(response => response.text())
+            .then(data => {{
+                document.getElementById("last-updated").textContent = '🕒 Cập nhật: ' + data.trim();
+            }})
+            .catch(err => {{
+                document.getElementById("last-updated").textContent = '🕒 Không thể tải thời gian cập nhật';
+            }});
     </script>
 </body>
 </html>
 """)
-print("✅ Đã cập nhật index.html")
+print("✅ Đã tạo index.html với hiển thị thời gian cập nhật")
 
 # Git add, commit, push
 subprocess.run(["git", "add", "."])
@@ -77,8 +106,3 @@ if push_result.returncode == 0:
 else:
     print("❌ Lỗi khi đẩy lên GitHub:")
     print(push_result.stderr)
-from datetime import datetime
-
-# Sau khi copy ảnh radar mới xong, thêm đoạn này:
-with open(os.path.join('rada', 'timestamp.txt'), 'w', encoding='utf-8') as f:
-    f.write(datetime.now().strftime('%d/%m/%Y %H:%M'))
