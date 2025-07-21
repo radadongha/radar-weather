@@ -1,115 +1,109 @@
 ﻿import os
 import shutil
-import time
+import glob
+import datetime
 import subprocess
-from datetime import datetime, timedelta
-import re
 
-# Cấu hình
-SOURCE_FOLDER = "D:/WinSCP/RADA"
-TARGET_FOLDER = "rada"
-MAX_IMAGES = 5
-DELETE_AFTER_DAYS = 1
+SOURCE_DIR = "D:/WinSCP/RADA"
+TARGET_DIR = "rada"
+HTML_FILE = "index.html"
 
-def parse_datetime_from_filename(filename):
-    match = re.search(r'(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})', filename)
-    if match:
-        yy, MM, dd, HH, mm = match.groups()
-        try:
-            dt = datetime.strptime(f"20{yy}-{MM}-{dd} {HH}:{mm}", "%Y-%m-%d %H:%M")
-            return dt.strftime("%Y-%m-%d %H:%M")
-        except:
-            return "Không rõ"
-    return "Không rõ"
+def extract_datetime(filename):
+    name = os.path.basename(filename)
+    try:
+        y = int(name[11:13]) + 2000
+        m = int(name[13:15])
+        d = int(name[15:17])
+        H = int(name[17:19])
+        M = int(name[19:21])
+        return datetime.datetime(y, m, d, H, M)
+    except Exception:
+        return None
 
-def get_latest_images():
-    files = [f for f in os.listdir(TARGET_FOLDER) if f.endswith(".jpg")]
-    files.sort(reverse=True)
-    return files[:MAX_IMAGES]
+def get_latest_images(n=5):
+    all_images = glob.glob(os.path.join(SOURCE_DIR, "*.MAX*.jpg"))
+    sorted_images = sorted(all_images, key=extract_datetime)
+    return sorted_images[-n:]
 
-def copy_new_images():
-    all_files = sorted(
-        [f for f in os.listdir(SOURCE_FOLDER) if f.endswith(".jpg")],
-        reverse=True
-    )
-    latest_files = all_files[:MAX_IMAGES]
-    copied = []
-    for file in latest_files:
-        src = os.path.join(SOURCE_FOLDER, file)
-        dst = os.path.join(TARGET_FOLDER, file)
-        if not os.path.exists(dst):
-            shutil.copy2(src, dst)
-            copied.append(file)
-    return copied
+def copy_images_to_target(images):
+    os.makedirs(TARGET_DIR, exist_ok=True)
+    for img_path in images:
+        shutil.copy2(img_path, os.path.join(TARGET_DIR, os.path.basename(img_path)))
 
-def delete_old_images():
-    now = time.time()
-    for f in os.listdir(TARGET_FOLDER):
-        path = os.path.join(TARGET_FOLDER, f)
-        if os.path.isfile(path):
-            if now - os.path.getmtime(path) > DELETE_AFTER_DAYS * 86400:
-                os.remove(path)
+def generate_html(image_paths):
+    image_files = [os.path.basename(path) for path in image_paths]
+    latest_time = extract_datetime(image_files[-1])
+    if latest_time:
+        radar_time = latest_time.strftime("%H:%M %d/%m/%Y")
+    else:
+        radar_time = "Không rõ"
 
-def generate_html(image_list):
-    latest_time = parse_datetime_from_filename(image_list[-1]) if image_list else "Không rõ"
-    with open("index.html", "w", encoding="utf-8") as f:
+    with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="300">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ảnh Radar Thời Tiết</title>
-  <style>
-    body {{
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }}
-    img {{
-      max-width: 90vw;
-      max-height: 90vh;
-      display: block;
-      margin: 0 auto;
-    }}
-    #time {{
-      font-size: 1.5rem;
-      margin: 1rem;
-    }}
-  </style>
+    <meta charset="UTF-8">
+    <title>Radar Thời Tiết</title>
+    <meta http-equiv="refresh" content="300">
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #000;
+            color: #fff;
+        }}
+        img {{
+            max-width: 90vw;
+            max-height: 90vh;
+            display: block;
+            margin: 20px auto;
+        }}
+        #time {{
+            font-size: 20px;
+            margin-top: 10px;
+        }}
+    </style>
 </head>
 <body>
-  <div id="time">🕒 Giờ radar: {latest_time}</div>
-  <img id="radar" src="rada/{image_list[-1]}" alt="Ảnh radar mới nhất">
-  <script>
-    const images = [{', '.join([f'"rada/{img}"' for img in image_list])}];
-    let index = 0;
-    setInterval(() => {{
-      index = (index + 1) % images.length;
-      document.getElementById('radar').src = images[index];
-    }}, 1000);
-  </script>
+    <h1>🛰️ Radar Thời Tiết</h1>
+    <div id="time">🕒 Giờ radar: {radar_time}</div>
+    <img id="radar" src="rada/{image_files[-1]}" alt="Radar">
+    <script>
+        const images = [{', '.join([f'"rada/{img}"' for img in image_files])}];
+        let index = 0;
+        setInterval(() => {{
+            index = (index + 1) % images.length;
+            document.getElementById("radar").src = images[index];
+        }}, 1000);
+    </script>
 </body>
-</html>""")
+</html>
+""")
+
+def delete_old_images(days=1):
+    now = datetime.datetime.now()
+    for f in glob.glob(os.path.join(TARGET_DIR, "*.jpg")):
+        t = datetime.datetime.fromtimestamp(os.path.getmtime(f))
+        if (now - t).days >= days:
+            os.remove(f)
 
 def run_git_commands():
     try:
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
-        subprocess.run(["git", "push"], check=True)
-        print("✅ Đã đẩy lên GitHub thành công.")
+        result = subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=False)
+        if result.returncode == 0:
+            subprocess.run(["git", "push"], check=True)
+            print("✅ Đã đẩy lên GitHub thành công.")
+        else:
+            print("ℹ️ Không có thay đổi để commit.")
     except subprocess.CalledProcessError as e:
         print("❌ Lỗi Git:", e)
 
 def main():
     print("🚀 Đang cập nhật ảnh radar...")
-    os.makedirs(TARGET_FOLDER, exist_ok=True)
-    delete_old_images()
-    copied = copy_new_images()
     latest_images = get_latest_images()
+    copy_images_to_target(latest_images)
+    delete_old_images()
     generate_html(latest_images)
     print("✅ Đã cập nhật danh sách ảnh vào index.html")
     run_git_commands()

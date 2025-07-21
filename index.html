@@ -1,41 +1,39 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="300">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ảnh Radar Thời Tiết</title>
-  <style>
-    body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    img {
-      max-width: 90vw;
-      max-height: 90vh;
-      display: block;
-      margin: 0 auto;
-    }
-    #time {
-      font-size: 1.5rem;
-      margin: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Radar Thời Tiết</title>
+    <meta http-equiv="refresh" content="300">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #000;
+            color: #fff;
+        }
+        img {
+            max-width: 90vw;
+            max-height: 90vh;
+            display: block;
+            margin: 20px auto;
+        }
+        #time {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div id="time">🕒 Giờ radar: 2025-07-21 13:00</div>
-  <img id="radar" src="rada/dong-ha-mon250721130004.MAX0073.jpg" alt="Ảnh radar mới nhất">
-  <script>
-    const images = ["rada/dong-ha-mon250721134004.MAX0077.jpg", "rada/dong-ha-mon250721133004.MAX0076.jpg", "rada/dong-ha-mon250721132004.MAX0075.jpg", "rada/dong-ha-mon250721131005.MAX0074.jpg", "rada/dong-ha-mon250721130004.MAX0073.jpg"];
-    let index = 0;
-    setInterval(() => {
-      index = (index + 1) % images.length;
-      document.getElementById('radar').src = images[index];
-    }, 1000);
-  </script>
+    <h1>🛰️ Radar Thời Tiết</h1>
+    <div id="time">🕒 Giờ radar: 13:40 21/07/2025</div>
+    <img id="radar" src="rada/dong-ha-mon250721134004.MAX0077.jpg" alt="Radar">
+    <script>
+        const images = ["rada/dong-ha-mon250721130004.MAX0073.jpg", "rada/dong-ha-mon250721131005.MAX0074.jpg", "rada/dong-ha-mon250721132004.MAX0075.jpg", "rada/dong-ha-mon250721133004.MAX0076.jpg", "rada/dong-ha-mon250721134004.MAX0077.jpg"];
+        let index = 0;
+        setInterval(() => {
+            index = (index + 1) % images.length;
+            document.getElementById("radar").src = images[index];
+        }, 1000);
+    </script>
 </body>
 </html>
