@@ -1,4 +1,5 @@
-﻿import os
+﻿# -*- coding: utf-8 -*-
+import os
 import shutil
 import glob
 import time
@@ -7,8 +8,9 @@ import io
 import sys
 from datetime import datetime, timedelta
 
-# Đảm bảo in ra Unicode được
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+# Đảm bảo in Unicode không lỗi trên CMD Windows
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8', errors='ignore')
+
 
 # === Cấu hình ===
 RADAR_DIR = "rada"
