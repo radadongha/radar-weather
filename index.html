@@ -1,40 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Ảnh Radar Thời Tiết</title>
-  <style>
-    body { font-family: Arial; text-align: center; background: #111; color: #fff; }
-    img { max-width: 90vw; max-height: 80vh; margin: 10px 0; }
-    p { font-size: 18px; margin-top: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Ảnh Radar Mới Nhất</title>
+    <style>
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; }
+        img { max-width: 90vw; max-height: 90vh; }
+    </style>
 </head>
 <body>
-  <h1>🛰️ Ảnh Radar Thời Tiết Mới Nhất</h1>
-
-  <!-- IMAGE LOOP START -->
-<div id="radar">
-<img src="rada/dong-ha-mon_20250721_1824.jpg" style="display:none;">
-<img src="rada/dong-ha-mon_20250721_1828.jpg" style="display:none;">
-<img src="rada/dong-ha-mon_20250721_1831.jpg" style="display:none;">
-<img src="rada/dong-ha-mon_20250721_1834.jpg" style="display:none;">
-<img src="rada/dong-ha-mon_20250721_1836.jpg" style="display:none;">
-
-</div>
-<p>🕒 Giờ radar: Không rõ</p>
-<!-- IMAGE LOOP END -->
-
-  <script>
-    const images = document.querySelectorAll("#radar img");
-    let current = 0;
-    function loopImages() {
-      images.forEach((img, i) => img.style.display = i === current ? "block" : "none");
-      current = (current + 1) % images.length;
-    }
-    if (images.length > 0) {
-      loopImages();
-      setInterval(loopImages, 1000); // mỗi giây đổi ảnh
-    }
-  </script>
+    <h2>🛰️ Giờ radar: 30:AX_.M_00/04/20.M</h2>
+    <div id="slideshow">
+        <img src="rada/dong-ha-mon250721133004.MAX0076.jpg" style="display:none;">
+        <img src="rada/dong-ha-mon250721132004.MAX0075.jpg" style="display:none;">
+        <img src="rada/dong-ha-mon250721131005.MAX0074.jpg" style="display:none;">
+        <img src="rada/dong-ha-mon250721130004.MAX0073.jpg" style="display:none;">
+        <img src="rada/dong-ha-mon250721125005.MAX0072.jpg" style="display:none;">
+    </div>
+<script>
+let imgs = document.querySelectorAll("#slideshow img");
+let index = 0;
+function showNext() {
+    imgs.forEach((img, i) => img.style.display = i === index ? "block" : "none");
+    index = (index + 1) % imgs.length;
+}
+showNext();
+setInterval(showNext, 1000);
+</script>
 </body>
 </html>
