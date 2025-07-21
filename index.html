@@ -7,18 +7,35 @@
     <style>
         body { text-align: center; background: #000; color: #fff; }
         img { max-width: 90vw; max-height: 90vh; }
+        #last-updated { margin-top: 10px; font-size: 1.2em; color: #ccc; }
     </style>
 </head>
 <body>
     <h2>Ảnh Radar - Tự động cập nhật</h2>
     <img id="radar" src="rada/dong-ha-mon250721073004.MAX0040.jpg" alt="Radar" />
+    <p id="last-updated">🕒 Cập nhật: đang tải...</p>
+
     <script>
-        const images = ["rada/dong-ha-mon250721071005.MAX0038.jpg", "rada/dong-ha-mon250721072004.MAX0039.jpg", "rada/dong-ha-mon250721073004.MAX0040.jpg"];
+        const images = [
+            "rada/dong-ha-mon250721071005.MAX0038.jpg",
+            "rada/dong-ha-mon250721072004.MAX0039.jpg",
+            "rada/dong-ha-mon250721073004.MAX0040.jpg"
+        ];
         let i = 0;
         setInterval(() => {
             document.getElementById("radar").src = images[i % images.length];
             i++;
         }, 1000);
+
+        // Cập nhật thời gian
+        fetch("rada/timestamp.txt")
+          .then(response => response.text())
+          .then(data => {
+            document.getElementById("last-updated").textContent = '🕒 Cập nhật: ' + data.trim();
+          })
+          .catch(err => {
+            document.getElementById("last-updated").textContent = '🕒 Không thể tải thời gian cập nhật';
+          });
     </script>
 </body>
 </html>
