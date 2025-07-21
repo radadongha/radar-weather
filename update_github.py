@@ -77,12 +77,8 @@ if push_result.returncode == 0:
 else:
     print("❌ Lỗi khi đẩy lên GitHub:")
     print(push_result.stderr)
-
 from datetime import datetime
 
-# Lấy thời gian hiện tại theo định dạng
-now = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-# Ghi vào file rada/timestamp.txt
-with open("rada/timestamp.txt", "w", encoding="utf-8") as f:
-    f.write(now)
+# Sau khi copy ảnh radar mới xong, thêm đoạn này:
+with open(os.path.join('rada', 'timestamp.txt'), 'w', encoding='utf-8') as f:
+    f.write(datetime.now().strftime('%d/%m/%Y %H:%M'))
