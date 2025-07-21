@@ -80,9 +80,9 @@ else:
 
 from datetime import datetime
 
-# Thời gian hiện tại định dạng: 21/07/2025 14:06
+# Lấy thời gian hiện tại theo định dạng
 now = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-# Lưu vào file timestamp.txt trong thư mục rada
+# Ghi vào file rada/timestamp.txt
 with open("rada/timestamp.txt", "w", encoding="utf-8") as f:
     f.write(now)
