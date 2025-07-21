@@ -43,17 +43,24 @@
     const timestamp = document.getElementById("timestamp");
 
     function updateImage() {
-      radarImg.src = imageList[index];
+  radarImg.src = imageList[index];
 
-      const timeLabel = imageList[index].split("mon")[1].split(".")[0];
-      const day = timeLabel.slice(0, 2);
-      const month = timeLabel.slice(2, 4);
-      const year = "20" + timeLabel.slice(4, 6);
-      const hour = timeLabel.slice(6, 8);
-      const minute = timeLabel.slice(8, 10);
+  const filename = imageList[index].split("/").pop(); // lấy tên file ảnh
+  const match = filename.match(/(\d{12})\.jpg$/); // tìm 12 chữ số liên tiếp
 
-      timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
-    }
+  if (match) {
+    const timeLabel = match[1]; // ví dụ: 202507211835
+    const year = timeLabel.slice(0, 4);
+    const month = timeLabel.slice(4, 6);
+    const day = timeLabel.slice(6, 8);
+    const hour = timeLabel.slice(8, 10);
+    const minute = timeLabel.slice(10, 12);
+    timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
+  } else {
+    timestamp.textContent = "Không rõ thời gian radar";
+  }
+}
+
 
     updateImage(); // ảnh đầu tiên
     setInterval(() => {
