@@ -1,63 +1,88 @@
 ﻿import os
 import shutil
+import glob
+import time
 import subprocess
-from datetime import datetime, timedelta
-import re
-import sys
 import io
+import sys
+from datetime import datetime, timedelta
 
+# Đảm bảo in ra Unicode được
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-
-# === CẤU HÌNH ===
-RADAR_FOLDER = "rada"
+# === Cấu hình ===
+RADAR_DIR = "rada"
 HTML_PATH = "index.html"
 MAX_IMAGES = 5
 DELETE_OLDER_THAN_DAYS = 1
 
-# === 1. XÓA ẢNH CŨ HƠN 1 NGÀY ===
+# === Lấy danh sách ảnh radar mới nhất ===
+def get_latest_images():
+    images = sorted(glob.glob(f"{RADAR_DIR}/*.jpg"), reverse=True)
+    return images[:MAX_IMAGES]
+
+# === Xóa ảnh cũ hơn 1 ngày ===
 def delete_old_images():
-    now = datetime.now()
-    cutoff = now - timedelta(days=DELETE_OLDER_THAN_DAYS)
+    now = time.time()
+    for img in glob.glob(f"{RADAR_DIR}/*.jpg"):
+        if os.stat(img).st_mtime < now - DELETE_OLDER_THAN_DAYS * 86400:
+            os.remove(img)
+            print(f"🗑️ Đã xóa ảnh cũ: {img}")
 
-    for filename in os.listdir(RADAR_FOLDER):
-        if filename.lower().endswith(".jpg"):
-            filepath = os.path.join(RADAR_FOLDER, filename)
-            try:
-                filetime = datetime.fromtimestamp(os.path.getmtime(filepath))
-                if filetime < cutoff:
-                    os.remove(filepath)
-                    print(f"🗑️ Đã xóa ảnh cũ: {filename}")
-            except Exception as e:
-                print(f"❌ Lỗi khi xóa {filename}: {e}")
+# === Cập nhật file HTML (index.html) ===
+def update_html(image_list):
+    try:
+        with open(HTML_PATH, "r", encoding="utf-8") as f:
+            html = f.read()
+    except FileNotFoundError:
+        html = "<html><head><meta charset='utf-8'></head><body><div id='loop'></div><div id='time'></div></body></html>"
 
-# === 2. CẬP NHẬT DANH SÁCH ẢNH VÀO index.html ===
-def update_image_list_in_html():
-    image_files = sorted(
-        [f for f in os.listdir(RADAR_FOLDER) if f.lower().endswith(".jpg")],
-        key=lambda f: os.path.getmtime(os.path.join(RADAR_FOLDER, f)),
-        reverse=True
-    )[:MAX_IMAGES]
-
-    image_lines = [f'"{RADAR_FOLDER}/{name}"' for name in image_files]
-    new_image_list = ",\n      ".join(image_lines)
-
-    with open(HTML_PATH, "r", encoding="utf-8") as f:
-        html = f.read()
-
-    new_html = re.sub(
-        r'<!-- IMAGE_LIST_START -->(.*?)<!-- IMAGE_LIST_END -->',
-        f'<!-- IMAGE_LIST_START -->\n      {new_image_list}\n      <!-- IMAGE_LIST_END -->',
-        html,
-        flags=re.DOTALL
+    # Tạo danh sách thẻ <img> cho loop
+    image_tags = "\n".join(
+        f'<img src="{img}" style="display:none; max-width:90vw; max-height:90vh;" />'
+        for img in image_list
     )
 
+    # Lấy giờ từ ảnh mới nhất
+    timestamp = os.path.basename(image_list[0]).replace(".jpg", "")
+    try:
+        dt = datetime.strptime(timestamp, "%Y%m%d%H%M")
+        formatted_time = dt.strftime("Giờ radar: %H:%M, ngày %d/%m/%Y")
+    except Exception:
+        formatted_time = f"Ảnh mới nhất: {timestamp}"
+
+    # Cập nhật nội dung
+    new_body = f"""
+<div id="loop">
+{image_tags}
+</div>
+<div id="time" style="margin-top:10px; font-weight:bold;">{formatted_time}</div>
+
+<script>
+let imgs = document.querySelectorAll('#loop img');
+let index = 0;
+setInterval(() => {{
+    imgs.forEach((img, i) => img.style.display = i === index ? 'block' : 'none');
+    index = (index + 1) % imgs.length;
+}}, 1000);
+</script>
+"""
+
+    # Ghi lại vào file HTML
+    html = html.replace(
+        re_between_tags(html, "<body>", "</body>"), f"<body>{new_body}</body>"
+    )
     with open(HTML_PATH, "w", encoding="utf-8") as f:
-        f.write(new_html)
+        f.write(html)
+    print("✅ Đã cập nhật danh sách ảnh vào index.html")
 
-    print(f"✅ Đã cập nhật danh sách ảnh vào {HTML_PATH}")
+# === Hàm hỗ trợ thay thế nội dung giữa 2 thẻ ===
+def re_between_tags(text, start_tag, end_tag):
+    start = text.find(start_tag)
+    end = text.find(end_tag, start)
+    return text[start:end + len(end_tag)] if start != -1 and end != -1 else ""
 
-# === 3. GIT: ADD + COMMIT + PUSH (an toàn) ===
+# === Đẩy lên GitHub ===
 def git_push():
     try:
         subprocess.run(["git", "add", "."], check=True)
@@ -78,8 +103,12 @@ def git_push():
     except subprocess.CalledProcessError as e:
         print("❌ Lỗi Git:", e)
 
-# === CHẠY CHÍNH ===
+# === Chạy chính ===
 if __name__ == "__main__":
     delete_old_images()
-    update_image_list_in_html()
-    git_push()
+    latest_images = get_latest_images()
+    if latest_images:
+        update_html(latest_images)
+        git_push()
+    else:
+        print("⚠️ Không tìm thấy ảnh radar nào.")

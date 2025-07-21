@@ -1,71 +1,39 @@
 ﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ảnh Radar Thời Tiết Mới Nhất</title>
+  <meta charset="UTF-8">
+  <title>Ảnh Radar Thời Tiết</title>
   <style>
     body {
-      background-color: #000;
-      color: #0f0;
-      font-family: monospace;
+      font-family: Arial, sans-serif;
       text-align: center;
-      padding-top: 20px;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
     }
     img {
       max-width: 90vw;
       max-height: 90vh;
-      border: 2px solid #0f0;
-    }
-    #timestamp {
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Radar Thời Tiết</h1>
-  <img id="radar" src="rada/loading.jpg" alt="Ảnh radar" />
-  <div id="timestamp">Đang tải ảnh...</div>
+<div id="loop">
+<img src="rada\dong-ha-mon_20250721_1836.jpg" style="display:none; max-width:90vw; max-height:90vh;" />
+<img src="rada\dong-ha-mon_20250721_1834.jpg" style="display:none; max-width:90vw; max-height:90vh;" />
+<img src="rada\dong-ha-mon_20250721_1831.jpg" style="display:none; max-width:90vw; max-height:90vh;" />
+<img src="rada\dong-ha-mon_20250721_1828.jpg" style="display:none; max-width:90vw; max-height:90vh;" />
+<img src="rada\dong-ha-mon_20250721_1824.jpg" style="display:none; max-width:90vw; max-height:90vh;" />
+</div>
+<div id="time" style="margin-top:10px; font-weight:bold;">Ảnh mới nhất: dong-ha-mon_20250721_1836</div>
 
-  <script>
-    const imageList = [
-      <!-- IMAGE_LIST_START -->
-      "rada/dong-ha-mon_20250721_1834.jpg",
-      "rada/dong-ha-mon_20250721_1836.jpg",
-      "rada/dong-ha-mon_20250721_1824.jpg",
-      "rada/dong-ha-mon_20250721_1828.jpg",
-      "rada/dong-ha-mon_20250721_1831.jpg"
-      <!-- IMAGE_LIST_END -->
-    ];
-
-    let index = 0;
-    const radarImg = document.getElementById("radar");
-    const timestamp = document.getElementById("timestamp");
-
-    function updateImage() {
-      radarImg.src = imageList[index];
-
-      const filename = imageList[index].split("/").pop();
-      const match = filename.match(/(\d{12})\.jpg$/); // YYYYMMDDHHmm
-
-      if (match) {
-        const timeLabel = match[1];
-        const year = timeLabel.slice(0, 4);
-        const month = timeLabel.slice(4, 6);
-        const day = timeLabel.slice(6, 8);
-        const hour = timeLabel.slice(8, 10);
-        const minute = timeLabel.slice(10, 12);
-        timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
-      } else {
-        timestamp.textContent = "Không rõ thời gian radar";
-      }
-    }
-
-    updateImage();
-    setInterval(() => {
-      index = (index + 1) % imageList.length;
-      updateImage();
-    }, 1000);
-  </script>
+<script>
+let imgs = document.querySelectorAll('#loop img');
+let index = 0;
+setInterval(() => {
+    imgs.forEach((img, i) => img.style.display = i === index ? 'block' : 'none');
+    index = (index + 1) % imgs.length;
+}, 1000);
+</script>
 </body>
 </html>
