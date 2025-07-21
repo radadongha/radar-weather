@@ -3,6 +3,11 @@ import shutil
 import subprocess
 from datetime import datetime, timedelta
 import re
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 
 # === CẤU HÌNH ===
 RADAR_FOLDER = "rada"
