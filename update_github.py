@@ -1,76 +1,69 @@
 ﻿import os
 import shutil
-import datetime
 import subprocess
+from datetime import datetime, timedelta
+import re
 
-# Thư mục chứa ảnh radar
-image_dir = "rada"
-# Đường dẫn file index.html
-index_file = "index.html"
-# Số ngày giữ lại ảnh
-days_to_keep = 1
+# === CẤU HÌNH ===
+RADAR_FOLDER = "rada"
+HTML_PATH = "index.html"
+MAX_IMAGES = 5
+DELETE_OLDER_THAN_DAYS = 1
 
-def get_latest_image(folder):
-    files = [os.path.join(folder, f) for f in os.listdir(folder)
-             if f.lower().endswith(('.jpg', '.png', '.gif'))]
-    if not files:
-        return None
-    return max(files, key=os.path.getmtime)
+# === 1. XÓA ẢNH CŨ HƠN 1 NGÀY ===
+def delete_old_images():
+    now = datetime.now()
+    cutoff = now - timedelta(days=DELETE_OLDER_THAN_DAYS)
 
-def delete_old_images(folder, days=1):
-    now = datetime.datetime.now()
-    for filename in os.listdir(folder):
-        path = os.path.join(folder, filename)
-        if os.path.isfile(path):
-            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(path))
-            if (now - mtime).days >= days:
-                os.remove(path)
+    for filename in os.listdir(RADAR_FOLDER):
+        if filename.lower().endswith(".jpg"):
+            filepath = os.path.join(RADAR_FOLDER, filename)
+            try:
+                filetime = datetime.fromtimestamp(os.path.getmtime(filepath))
+                if filetime < cutoff:
+                    os.remove(filepath)
+                    print(f"🗑️ Đã xóa ảnh cũ: {filename}")
+            except Exception as e:
+                print(f"❌ Lỗi khi xóa {filename}: {e}")
 
-def update_html(image_path):
-    timestamp = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Ảnh Radar Thời Tiết Mới Nhất</title>
-        <meta http-equiv="refresh" content="600">
-        <style>
-            body {{ background-color: #000; color: #fff; text-align: center; font-family: Arial; }}
-            img {{ max-width: 90vw; max-height: 90vh; }}
-        </style>
-    </head>
-    <body>
-        <h2>Ảnh Radar Thời Tiết Mới Nhất</h2>
-        <p>Cập nhật lúc: {timestamp}</p>
-        <img src="{image_path}" alt="Ảnh radar mới nhất">
-    </body>
-    </html>
-    """
-    with open(index_file, "w", encoding="utf-8") as f:
-        f.write(html_content)
+# === 2. CẬP NHẬT DANH SÁCH ẢNH MỚI NHẤT VÀO index.html ===
+def update_image_list_in_html():
+    image_files = sorted(
+        [f for f in os.listdir(RADAR_FOLDER) if f.lower().endswith(".jpg")],
+        key=lambda f: os.path.getmtime(os.path.join(RADAR_FOLDER, f)),
+        reverse=True
+    )[:MAX_IMAGES]
 
-def git_commit_push():
+    image_lines = [f'"{RADAR_FOLDER}/{name}"' for name in image_files]
+    new_image_list = ",\n      ".join(image_lines)
+
+    with open(HTML_PATH, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    new_html = re.sub(
+        r'<!-- IMAGE_LIST_START -->(.*?)<!-- IMAGE_LIST_END -->',
+        f'<!-- IMAGE_LIST_START -->\n      {new_image_list}\n      <!-- IMAGE_LIST_END -->',
+        html,
+        flags=re.DOTALL
+    )
+
+    with open(HTML_PATH, "w", encoding="utf-8") as f:
+        f.write(new_html)
+
+    print(f"✅ Đã cập nhật danh sách ảnh vào {HTML_PATH}")
+
+# === 3. GIT: ADD + COMMIT + PUSH ===
+def git_push():
     try:
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", "Cập nhật ảnh radar"], check=True)
+        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
         subprocess.run(["git", "push"], check=True)
-        print("✅ Đã push lên GitHub.")
+        print("✅ Đã đẩy lên GitHub thành công.")
     except subprocess.CalledProcessError as e:
-        print(f"❌ Lỗi Git: {e}")
+        print("❌ Lỗi Git:", e)
 
+# === CHẠY CHÍNH ===
 if __name__ == "__main__":
-    # Xóa ảnh cũ
-    delete_old_images(image_dir, days=days_to_keep)
-
-    # Lấy ảnh mới nhất
-    latest_image = get_latest_image(image_dir)
-    if not latest_image:
-        print("Không tìm thấy ảnh radar.")
-        exit(1)
-
-    # Cập nhật file HTML
-    update_html(latest_image)
-
-    # Push lên GitHub
-    git_commit_push()
+    delete_old_images()
+    update_image_list_in_html()
+    git_push()

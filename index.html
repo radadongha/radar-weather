@@ -1,19 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ảnh Radar Thời Tiết Mới Nhất</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 20px;
+    }
+    img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 2px solid #0f0;
+    }
+    #timestamp {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Radar Thời Tiết</h1>
+  <img id="radar" src="rada/loading.jpg" alt="Ảnh radar" />
+  <div id="timestamp">Đang tải ảnh...</div>
 
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Ảnh Radar Thời Tiết Mới Nhất</title>
-        <meta http-equiv="refresh" content="600">
-        <style>
-            body { background-color: #000; color: #fff; text-align: center; font-family: Arial; }
-            img { max-width: 90vw; max-height: 90vh; }
-        </style>
-    </head>
-    <body>
-        <h2>Ảnh Radar Thời Tiết Mới Nhất</h2>
-        <p>Cập nhật lúc: 20:04:30 21-07-2025</p>
-        <img src="rada\dong-ha-mon_20250721_1834.jpg" alt="Ảnh radar mới nhất">
-    </body>
-    </html>
-    
+  <script>
+    const imageList = [
+      <!-- IMAGE_LIST_START -->
+      "rada/dong-ha-mon_20250721_1834.jpg",
+      "rada/dong-ha-mon_20250721_1836.jpg",
+      "rada/dong-ha-mon_20250721_1824.jpg",
+      "rada/dong-ha-mon_20250721_1828.jpg",
+      "rada/dong-ha-mon_20250721_1831.jpg"
+      <!-- IMAGE_LIST_END -->
+    ];
+
+    let index = 0;
+    const radarImg = document.getElementById("radar");
+    const timestamp = document.getElementById("timestamp");
+
+    function updateImage() {
+      radarImg.src = imageList[index];
+
+      const timeLabel = imageList[index].split("mon")[1].split(".")[0];
+      const day = timeLabel.slice(0, 2);
+      const month = timeLabel.slice(2, 4);
+      const year = "20" + timeLabel.slice(4, 6);
+      const hour = timeLabel.slice(6, 8);
+      const minute = timeLabel.slice(8, 10);
+
+      timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
+    }
+
+    updateImage(); // ảnh đầu tiên
+    setInterval(() => {
+      index = (index + 1) % imageList.length;
+      updateImage();
+    }, 1000);
+  </script>
+</body>
+</html>
