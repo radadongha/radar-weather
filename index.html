@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -22,3 +22,11 @@
     </script>
 </body>
 </html>
+fetch("rada/timestamp.txt")
+  .then(response => response.text())
+  .then(data => {
+    document.getElementById("last-updated").textContent = '🕒 Cập nhật: ' + data.trim();
+  })
+  .catch(err => {
+    document.getElementById("last-updated").textContent = '🕒 Không thể tải thời gian cập nhật';
+  });
