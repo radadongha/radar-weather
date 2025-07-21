@@ -26,7 +26,7 @@ def delete_old_images():
             except Exception as e:
                 print(f"❌ Lỗi khi xóa {filename}: {e}")
 
-# === 2. CẬP NHẬT DANH SÁCH ẢNH MỚI NHẤT VÀO index.html ===
+# === 2. CẬP NHẬT DANH SÁCH ẢNH VÀO index.html ===
 def update_image_list_in_html():
     image_files = sorted(
         [f for f in os.listdir(RADAR_FOLDER) if f.lower().endswith(".jpg")],
@@ -52,13 +52,24 @@ def update_image_list_in_html():
 
     print(f"✅ Đã cập nhật danh sách ảnh vào {HTML_PATH}")
 
-# === 3. GIT: ADD + COMMIT + PUSH ===
+# === 3. GIT: ADD + COMMIT + PUSH (an toàn) ===
 def git_push():
     try:
         subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
-        subprocess.run(["git", "push"], check=True)
-        print("✅ Đã đẩy lên GitHub thành công.")
+
+        result = subprocess.run(
+            ["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        if "nothing to commit" in result.stderr.lower():
+            print("ℹ️ Không có thay đổi để commit.")
+        else:
+            subprocess.run(["git", "push"], check=True)
+            print("✅ Đã đẩy lên GitHub thành công.")
+
     except subprocess.CalledProcessError as e:
         print("❌ Lỗi Git:", e)
 

@@ -43,26 +43,25 @@
     const timestamp = document.getElementById("timestamp");
 
     function updateImage() {
-  radarImg.src = imageList[index];
+      radarImg.src = imageList[index];
 
-  const filename = imageList[index].split("/").pop(); // lấy tên file ảnh
-  const match = filename.match(/(\d{12})\.jpg$/); // tìm 12 chữ số liên tiếp
+      const filename = imageList[index].split("/").pop();
+      const match = filename.match(/(\d{12})\.jpg$/); // YYYYMMDDHHmm
 
-  if (match) {
-    const timeLabel = match[1]; // ví dụ: 202507211835
-    const year = timeLabel.slice(0, 4);
-    const month = timeLabel.slice(4, 6);
-    const day = timeLabel.slice(6, 8);
-    const hour = timeLabel.slice(8, 10);
-    const minute = timeLabel.slice(10, 12);
-    timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
-  } else {
-    timestamp.textContent = "Không rõ thời gian radar";
-  }
-}
+      if (match) {
+        const timeLabel = match[1];
+        const year = timeLabel.slice(0, 4);
+        const month = timeLabel.slice(4, 6);
+        const day = timeLabel.slice(6, 8);
+        const hour = timeLabel.slice(8, 10);
+        const minute = timeLabel.slice(10, 12);
+        timestamp.textContent = `Giờ radar: ${hour}:${minute} ngày ${day}/${month}/${year}`;
+      } else {
+        timestamp.textContent = "Không rõ thời gian radar";
+      }
+    }
 
-
-    updateImage(); // ảnh đầu tiên
+    updateImage();
     setInterval(() => {
       index = (index + 1) % imageList.length;
       updateImage();
