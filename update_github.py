@@ -1,48 +1,39 @@
-import os
+﻿import os
 import shutil
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# Cấu hình thư mục
 source_dir = "D:/WinSCP/RADA"
-dest_dir = "rada"
-html_file = "index.html"
+dest_dir = "docs/rada"
+html_file = "docs/index.html"
 
-# Tạo thư mục rada nếu chưa có
-if not os.path.exists(dest_dir):
-    os.makedirs(dest_dir)
+# Tạo thư mục nếu chưa có
+os.makedirs(dest_dir, exist_ok=True)
 
-# Lấy danh sách ảnh radar mới nhất
-all_images = sorted(
-    [f for f in os.listdir(source_dir) if f.endswith(".jpg")],
-    reverse=True
-)
-latest_images = all_images[:3]  # 3 ảnh mới nhất
+# Lấy 3 ảnh radar mới nhất
+all_images = sorted([f for f in os.listdir(source_dir) if f.endswith(".jpg")], reverse=True)
+latest_images = all_images[:3]
 
-# Sao chép ảnh mới sang rada/
+# Sao chép ảnh vào docs/rada
 for img in latest_images:
-    src = os.path.join(source_dir, img)
-    dst = os.path.join(dest_dir, img)
-    shutil.copy2(src, dst)
-    print(f"✅ Đã sao chép ảnh: {img} vào thư mục rada/")
+    shutil.copy2(os.path.join(source_dir, img), os.path.join(dest_dir, img))
+    print(f"✅ Sao chép: {img}")
 
-# Xóa ảnh trong rada/ cũ hơn 1 ngày
+# Xoá ảnh cũ hơn 1 ngày
 now = time.time()
-deleted = 0
 for f in os.listdir(dest_dir):
-    file_path = os.path.join(dest_dir, f)
-    if f.endswith(".jpg") and os.path.isfile(file_path):
-        if now - os.path.getmtime(file_path) > 86400:
-            os.remove(file_path)
-            deleted += 1
-print(f"🗑️ Đã xóa {deleted} ảnh cũ hơn 1 ngày trong rada/")
+    fp = os.path.join(dest_dir, f)
+    if f.endswith(".jpg") and os.path.isfile(fp):
+        if now - os.path.getmtime(fp) > 86400:
+            os.remove(fp)
+            print(f"🗑️ Xoá: {f}")
 
-# Ghi file timestamp.txt chứa thời gian cập nhật
-with open(os.path.join(dest_dir, 'timestamp.txt'), 'w', encoding='utf-8') as f:
-    f.write(datetime.now().strftime('%d/%m/%Y %H:%M'))
+# Tạo timestamp.txt
+with open(os.path.join(dest_dir, "timestamp.txt"), "w", encoding="utf-8") as f:
+    f.write(datetime.now().strftime("%d/%m/%Y %H:%M"))
 
-# Tạo index.html hiển thị radar loop và thời gian cập nhật
+# Tạo lại index.html với ảnh mới và timestamp
 with open(html_file, "w", encoding="utf-8") as f:
     f.write(f"""<!DOCTYPE html>
 <html lang="vi">
@@ -92,17 +83,11 @@ with open(html_file, "w", encoding="utf-8") as f:
             }});
     </script>
 </body>
-</html>
-""")
-print("✅ Đã tạo index.html với hiển thị thời gian cập nhật")
+</html>""")
 
-# Git add, commit, push
+print("✅ Đã tạo index.html hoàn chỉnh!")
+
+# Git push
 subprocess.run(["git", "add", "."])
-subprocess.run(["git", "commit", "-m", f"Cập nhật {latest_images[0]}"])
-push_result = subprocess.run(["git", "push"], capture_output=True, text=True)
-
-if push_result.returncode == 0:
-    print("🚀 Đã đẩy lên GitHub thành công.")
-else:
-    print("❌ Lỗi khi đẩy lên GitHub:")
-    print(push_result.stderr)
+subprocess.run(["git", "commit", "-m", "Cập nhật radar"])
+subprocess.run(["git", "push"])
