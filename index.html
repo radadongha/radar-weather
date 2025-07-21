@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,7 @@
     <p id="last-updated">🕒 Cập nhật: đang tải...</p>
 
     <script>
-        // Loop các ảnh radar
+        // Danh sách các ảnh radar để loop
         const images = [
             "rada/dong-ha-mon250721071005.MAX0038.jpg",
             "rada/dong-ha-mon250721072004.MAX0039.jpg",
@@ -41,7 +41,7 @@
             i++;
         }, 1000);
 
-        // Tải thời gian cập nhật từ timestamp.txt
+        // Hiển thị thời gian cập nhật từ timestamp.txt
         fetch("rada/timestamp.txt")
             .then(response => response.text())
             .then(data => {
