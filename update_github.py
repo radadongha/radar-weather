@@ -1,93 +1,76 @@
 ﻿import os
 import shutil
+import datetime
 import subprocess
-import time
-from datetime import datetime
 
-source_dir = "D:/WinSCP/RADA"
-dest_dir = "docs/rada"
-html_file = "docs/index.html"
+# Thư mục chứa ảnh radar
+image_dir = "rada"
+# Đường dẫn file index.html
+index_file = "index.html"
+# Số ngày giữ lại ảnh
+days_to_keep = 1
 
-# Tạo thư mục nếu chưa có
-os.makedirs(dest_dir, exist_ok=True)
+def get_latest_image(folder):
+    files = [os.path.join(folder, f) for f in os.listdir(folder)
+             if f.lower().endswith(('.jpg', '.png', '.gif'))]
+    if not files:
+        return None
+    return max(files, key=os.path.getmtime)
 
-# Lấy 3 ảnh radar mới nhất
-all_images = sorted([f for f in os.listdir(source_dir) if f.endswith(".jpg")], reverse=True)
-latest_images = all_images[:3]
+def delete_old_images(folder, days=1):
+    now = datetime.datetime.now()
+    for filename in os.listdir(folder):
+        path = os.path.join(folder, filename)
+        if os.path.isfile(path):
+            mtime = datetime.datetime.fromtimestamp(os.path.getmtime(path))
+            if (now - mtime).days >= days:
+                os.remove(path)
 
-# Sao chép ảnh vào docs/rada
-for img in latest_images:
-    shutil.copy2(os.path.join(source_dir, img), os.path.join(dest_dir, img))
-    print(f"✅ Sao chép: {img}")
+def update_html(image_path):
+    timestamp = datetime.datetime.now().strftime("%H:%M:%S %d-%m-%Y")
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Ảnh Radar Thời Tiết Mới Nhất</title>
+        <meta http-equiv="refresh" content="600">
+        <style>
+            body {{ background-color: #000; color: #fff; text-align: center; font-family: Arial; }}
+            img {{ max-width: 90vw; max-height: 90vh; }}
+        </style>
+    </head>
+    <body>
+        <h2>Ảnh Radar Thời Tiết Mới Nhất</h2>
+        <p>Cập nhật lúc: {timestamp}</p>
+        <img src="{image_path}" alt="Ảnh radar mới nhất">
+    </body>
+    </html>
+    """
+    with open(index_file, "w", encoding="utf-8") as f:
+        f.write(html_content)
 
-# Xoá ảnh cũ hơn 1 ngày
-now = time.time()
-for f in os.listdir(dest_dir):
-    fp = os.path.join(dest_dir, f)
-    if f.endswith(".jpg") and os.path.isfile(fp):
-        if now - os.path.getmtime(fp) > 86400:
-            os.remove(fp)
-            print(f"🗑️ Xoá: {f}")
+def git_commit_push():
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", "Cập nhật ảnh radar"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("✅ Đã push lên GitHub.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Lỗi Git: {e}")
 
-# Tạo timestamp.txt
-with open(os.path.join(dest_dir, "timestamp.txt"), "w", encoding="utf-8") as f:
-    f.write(datetime.now().strftime("%d/%m/%Y %H:%M"))
+if __name__ == "__main__":
+    # Xóa ảnh cũ
+    delete_old_images(image_dir, days=days_to_keep)
 
-# Tạo lại index.html với ảnh mới và timestamp
-with open(html_file, "w", encoding="utf-8") as f:
-    f.write(f"""<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Ảnh Radar Thời Tiết Mới Nhất</title>
-    <meta http-equiv="refresh" content="300">
-    <style>
-        body {{
-            background-color: black;
-            color: white;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }}
-        img {{
-            max-width: 90vw;
-            height: auto;
-            margin-top: 20px;
-        }}
-        #last-updated {{
-            margin-top: 10px;
-            font-size: 1.2em;
-            color: #cccccc;
-        }}
-    </style>
-</head>
-<body>
-    <h2>Ảnh Radar - Tự động cập nhật</h2>
-    <img id="radar" src="rada/{latest_images[0]}" alt="Radar" />
-    <p id="last-updated">🕒 Cập nhật: đang tải...</p>
+    # Lấy ảnh mới nhất
+    latest_image = get_latest_image(image_dir)
+    if not latest_image:
+        print("Không tìm thấy ảnh radar.")
+        exit(1)
 
-    <script>
-        const images = [{', '.join(f'"rada/{img}"' for img in reversed(latest_images))}];
-        let i = 0;
-        setInterval(() => {{
-            document.getElementById("radar").src = images[i % images.length];
-            i++;
-        }}, 1000);
+    # Cập nhật file HTML
+    update_html(latest_image)
 
-        fetch("rada/timestamp.txt")
-            .then(response => response.text())
-            .then(data => {{
-                document.getElementById("last-updated").textContent = '🕒 Cập nhật: ' + data.trim();
-            }})
-            .catch(err => {{
-                document.getElementById("last-updated").textContent = '🕒 Không thể tải thời gian cập nhật';
-            }});
-    </script>
-</body>
-</html>""")
-
-print("✅ Đã tạo index.html hoàn chỉnh!")
-
-# Git push
-subprocess.run(["git", "add", "."])
-subprocess.run(["git", "commit", "-m", "Cập nhật radar"])
-subprocess.run(["git", "push"])
+    # Push lên GitHub
+    git_commit_push()
