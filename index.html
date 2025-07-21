@@ -25,23 +25,17 @@
 </head>
 <body>
     <h2>Ảnh Radar - Tự động cập nhật</h2>
-    <img id="radar" src="rada/dong-ha-mon250721073004.MAX0040.jpg" alt="Radar" />
+    <img id="radar" src="rada/dong-ha-mon250721082005.MAX0045.jpg" alt="Radar" />
     <p id="last-updated">🕒 Cập nhật: đang tải...</p>
 
     <script>
-        // Loop các ảnh radar
-        const images = [
-            "rada/dong-ha-mon250721071005.MAX0038.jpg",
-            "rada/dong-ha-mon250721072004.MAX0039.jpg",
-            "rada/dong-ha-mon250721073004.MAX0040.jpg"
-        ];
+        const images = ["rada/dong-ha-mon250721080004.MAX0043.jpg", "rada/dong-ha-mon250721081004.MAX0044.jpg", "rada/dong-ha-mon250721082005.MAX0045.jpg"];
         let i = 0;
         setInterval(() => {
             document.getElementById("radar").src = images[i % images.length];
             i++;
         }, 1000);
 
-        // Tải thời gian cập nhật từ timestamp.txt
         fetch("rada/timestamp.txt")
             .then(response => response.text())
             .then(data => {
