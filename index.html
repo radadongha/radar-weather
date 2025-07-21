@@ -1,25 +1,40 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Ảnh Radar</title>
-    <style>
-        body { margin: 0; background: black; color: white; text-align: center; }
-        img { max-width: 90vw; max-height: 90vh; }
-        #time { margin-top: 10px; font-size: 18px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Ảnh Radar Thời Tiết</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #111; color: #fff; }
+    img { max-width: 90vw; max-height: 80vh; margin: 10px 0; }
+    p { font-size: 18px; margin-top: 10px; }
+  </style>
 </head>
 <body>
-    <h2>Ảnh Radar Thời Tiết</h2>
-    <div id="time">Giờ radar: dong--h-a- mo:n_20250721_1836</div>
-    <img id="radar" src="rada\dong-ha-mon_20250721_1836.jpg" />
-    <script>
-        const images = ["dong-ha-mon_20250721_1824.jpg", "dong-ha-mon_20250721_1828.jpg", "dong-ha-mon_20250721_1831.jpg", "dong-ha-mon_20250721_1834.jpg", "dong-ha-mon_20250721_1836.jpg"];
-        let i = 0;
-        setInterval(() => {
-            i = (i + 1) % images.length;
-            document.getElementById("radar").src = "rada/" + images[i];
-        }, 1000);
-    </script>
+  <h1>🛰️ Ảnh Radar Thời Tiết Mới Nhất</h1>
+
+  <!-- IMAGE LOOP START -->
+<div id="radar">
+<img src="rada/dong-ha-mon_20250721_1824.jpg" style="display:none;">
+<img src="rada/dong-ha-mon_20250721_1828.jpg" style="display:none;">
+<img src="rada/dong-ha-mon_20250721_1831.jpg" style="display:none;">
+<img src="rada/dong-ha-mon_20250721_1834.jpg" style="display:none;">
+<img src="rada/dong-ha-mon_20250721_1836.jpg" style="display:none;">
+
+</div>
+<p>🕒 Giờ radar: Không rõ</p>
+<!-- IMAGE LOOP END -->
+
+  <script>
+    const images = document.querySelectorAll("#radar img");
+    let current = 0;
+    function loopImages() {
+      images.forEach((img, i) => img.style.display = i === current ? "block" : "none");
+      current = (current + 1) % images.length;
+    }
+    if (images.length > 0) {
+      loopImages();
+      setInterval(loopImages, 1000); // mỗi giây đổi ảnh
+    }
+  </script>
 </body>
 </html>

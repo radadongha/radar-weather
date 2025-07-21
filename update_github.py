@@ -1,79 +1,88 @@
-﻿# update_github.py
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import os
-import shutil
 import glob
-import time
+import shutil
 import subprocess
 from datetime import datetime, timedelta
-
-IMAGE_DIR = "rada"
-HTML_PATH = "index.html"
-MAX_IMAGES = 5  # số ảnh loop
-GIT_COMMIT_MSG = "🛰️ Cập nhật ảnh radar tự động"
-
-# Đảm bảo encoding khi in ra terminal
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='ignore')
 
-# Xóa ảnh cũ hơn 1 ngày
-now = time.time()
-for f in glob.glob(os.path.join(IMAGE_DIR, "*.jpg")):
-    if os.stat(f).st_mtime < now - 86400:
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8', errors='ignore')
+
+# Đường dẫn
+SOURCE_FOLDER = r"D:/WinSCP/RADA"
+DEST_FOLDER = "rada"
+HTML_PATH = "index.html"
+MAX_IMAGES = 5
+
+# 1. Lấy ảnh radar mới nhất
+image_files = sorted(glob.glob(os.path.join(SOURCE_FOLDER, "*.jpg")), key=os.path.getmtime, reverse=True)
+if not image_files:
+    print("❌ Không tìm thấy ảnh radar trong thư mục.")
+    sys.exit(1)
+
+latest_image_path = image_files[0]
+filename = os.path.basename(latest_image_path)
+dest_path = os.path.join(DEST_FOLDER, filename)
+
+# 2. Copy nếu ảnh mới chưa có
+if not os.path.exists(dest_path):
+    shutil.copy2(latest_image_path, dest_path)
+    print(f"✅ Đã sao chép ảnh mới: {filename}")
+else:
+    print(f"ℹ️ Ảnh mới đã tồn tại: {filename}")
+
+# 3. Xóa ảnh cũ hơn 1 ngày
+now = datetime.now()
+for f in glob.glob(os.path.join(DEST_FOLDER, "*.jpg")):
+    t = os.path.getmtime(f)
+    if now - datetime.fromtimestamp(t) > timedelta(days=1):
         os.remove(f)
+        print(f"🗑️ Đã xóa ảnh cũ: {os.path.basename(f)}")
 
-# Tìm ảnh mới nhất
-images = sorted(glob.glob(os.path.join(IMAGE_DIR, "*.jpg")))
-if not images:
-    print("❌ Không tìm thấy ảnh nào trong thư mục.")
-    exit()
+# 4. Cập nhật index.html
+image_list = sorted(glob.glob(os.path.join(DEST_FOLDER, "*.jpg")), reverse=True)[:MAX_IMAGES]
+image_list = sorted(image_list)  # để loop đúng thứ tự thời gian
 
-latest_image = images[-1]
-timestamp = os.path.basename(latest_image).split(".")[0]
-# Tên ảnh giả sử: 202507211730.jpg
+images_html = ""
+for img_path in image_list:
+    img_name = os.path.basename(img_path)
+    images_html += f'<img src="{DEST_FOLDER}/{img_name}" style="display:none;">\n'
 
-# Tạo nội dung HTML mới
-image_tags = ""
-for img in images[-MAX_IMAGES:]:
-    image_tags += f'<img src="{img}" style="display:none;" />\n'
+# Lấy giờ từ tên file
+time_str = ""
+try:
+    parts = filename.split(".")[0].split("_")[-1]  # ví dụ: dong-ha-mon202507211730
+    dt = datetime.strptime(parts[-12:], "%Y%m%d%H%M")
+    time_str = dt.strftime("%Y-%m-%d %H:%M")
+except:
+    time_str = "Không rõ"
 
-html_content = f"""<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Ảnh Radar</title>
-    <style>
-        body {{ margin: 0; background: black; color: white; text-align: center; }}
-        img {{ max-width: 90vw; max-height: 90vh; }}
-        #time {{ margin-top: 10px; font-size: 18px; }}
-    </style>
-</head>
-<body>
-    <h2>Ảnh Radar Thời Tiết</h2>
-    <div id="time">Giờ radar: {timestamp[:4]}-{timestamp[4:6]}-{timestamp[6:8]} {timestamp[8:10]}:{timestamp[10:]}</div>
-    <img id="radar" src="{images[-1]}" />
-    <script>
-        const images = [{', '.join(f'"{os.path.basename(i)}"' for i in images[-MAX_IMAGES:])}];
-        let i = 0;
-        setInterval(() => {{
-            i = (i + 1) % images.length;
-            document.getElementById("radar").src = "{IMAGE_DIR}/" + images[i];
-        }}, 1000);
-    </script>
-</body>
-</html>"""
+with open(HTML_PATH, "r", encoding="utf-8") as f:
+    html = f.read()
 
-# Ghi vào file index.html
+start_marker = "<!-- IMAGE LOOP START -->"
+end_marker = "<!-- IMAGE LOOP END -->"
+
+before = html.split(start_marker)[0]
+after = html.split(end_marker)[1]
+
+new_html = f"""{before}{start_marker}
+<div id="radar">
+{images_html}
+</div>
+<p>🕒 Giờ radar: {time_str}</p>
+{end_marker}{after}"""
+
 with open(HTML_PATH, "w", encoding="utf-8") as f:
-    f.write(html_content)
+    f.write(new_html)
 
 print("✅ Đã cập nhật danh sách ảnh vào index.html")
 
-# Push Git
+# 5. Đẩy lên GitHub
 try:
     subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", GIT_COMMIT_MSG], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("✅ Đã đẩy lên GitHub thành công.")
 except subprocess.CalledProcessError as e:
