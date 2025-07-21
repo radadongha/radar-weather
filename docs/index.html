@@ -25,11 +25,11 @@
 </head>
 <body>
     <h2>Ảnh Radar - Tự động cập nhật</h2>
-    <img id="radar" src="rada/dong-ha-mon250721083004.MAX0046.jpg" alt="Radar" />
+    <img id="radar" src="rada/dong-ha-mon250721084004.MAX0047.jpg" alt="Radar" />
     <p id="last-updated">🕒 Cập nhật: đang tải...</p>
 
     <script>
-        const images = ["rada/dong-ha-mon250721081004.MAX0044.jpg", "rada/dong-ha-mon250721082005.MAX0045.jpg", "rada/dong-ha-mon250721083004.MAX0046.jpg"];
+        const images = ["rada/dong-ha-mon250721082005.MAX0045.jpg", "rada/dong-ha-mon250721083004.MAX0046.jpg", "rada/dong-ha-mon250721084004.MAX0047.jpg"];
         let i = 0;
         setInterval(() => {
             document.getElementById("radar").src = images[i % images.length];
