@@ -77,12 +77,3 @@ if push_result.returncode == 0:
 else:
     print("❌ Lỗi khi đẩy lên GitHub:")
     print(push_result.stderr)
-
-from datetime import datetime
-
-# Thời gian hiện tại định dạng: 21/07/2025 14:06
-now = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-# Lưu vào file timestamp.txt trong thư mục rada
-with open("rada/timestamp.txt", "w", encoding="utf-8") as f:
-    f.write(now)
