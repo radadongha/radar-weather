@@ -1,79 +1,101 @@
 ﻿import os
 import shutil
-import datetime
+import time
 import subprocess
+from datetime import datetime, timedelta
+import re
 
+# Cấu hình
 SOURCE_FOLDER = "D:/WinSCP/RADA"
-DEST_FOLDER = "rada"
-HTML_FILE = "index.html"
+TARGET_FOLDER = "rada"
 MAX_IMAGES = 5
-IMAGE_EXT = ".jpg"
+DELETE_AFTER_DAYS = 1
 
-def list_images(folder):
-    return sorted(
-        [f for f in os.listdir(folder) if f.endswith(IMAGE_EXT)],
-        key=lambda x: os.path.getmtime(os.path.join(folder, x)),
+def parse_datetime_from_filename(filename):
+    match = re.search(r'(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})', filename)
+    if match:
+        yy, MM, dd, HH, mm = match.groups()
+        try:
+            dt = datetime.strptime(f"20{yy}-{MM}-{dd} {HH}:{mm}", "%Y-%m-%d %H:%M")
+            return dt.strftime("%Y-%m-%d %H:%M")
+        except:
+            return "Không rõ"
+    return "Không rõ"
+
+def get_latest_images():
+    files = [f for f in os.listdir(TARGET_FOLDER) if f.endswith(".jpg")]
+    files.sort(reverse=True)
+    return files[:MAX_IMAGES]
+
+def copy_new_images():
+    all_files = sorted(
+        [f for f in os.listdir(SOURCE_FOLDER) if f.endswith(".jpg")],
         reverse=True
     )
+    latest_files = all_files[:MAX_IMAGES]
+    copied = []
+    for file in latest_files:
+        src = os.path.join(SOURCE_FOLDER, file)
+        dst = os.path.join(TARGET_FOLDER, file)
+        if not os.path.exists(dst):
+            shutil.copy2(src, dst)
+            copied.append(file)
+    return copied
 
-def copy_latest_images():
-    images = list_images(SOURCE_FOLDER)[:MAX_IMAGES]
-    os.makedirs(DEST_FOLDER, exist_ok=True)
-    for img in images:
-        src = os.path.join(SOURCE_FOLDER, img)
-        dst = os.path.join(DEST_FOLDER, img)
-        shutil.copy2(src, dst)
-    return images
-
-def delete_old_images(folder, keep_list):
-    for f in os.listdir(folder):
-        if f.endswith(IMAGE_EXT) and f not in keep_list:
-            os.remove(os.path.join(folder, f))
+def delete_old_images():
+    now = time.time()
+    for f in os.listdir(TARGET_FOLDER):
+        path = os.path.join(TARGET_FOLDER, f)
+        if os.path.isfile(path):
+            if now - os.path.getmtime(path) > DELETE_AFTER_DAYS * 86400:
+                os.remove(path)
 
 def generate_html(image_list):
-    with open(HTML_FILE, "w", encoding="utf-8") as f:
-        f.write("""<!DOCTYPE html>
+    latest_time = parse_datetime_from_filename(image_list[-1]) if image_list else "Không rõ"
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(f"""<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="300">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ảnh Radar Thời Tiết</title>
   <style>
-    body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; }
-    img { max-width: 90%%; max-height: 90%%; margin: 0 auto; display: block; }
-    #timestamp { margin-top: 10px; font-size: 1.2em; color: #ccc; }
+    body {{
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }}
+    img {{
+      max-width: 90vw;
+      max-height: 90vh;
+      display: block;
+      margin: 0 auto;
+    }}
+    #time {{
+      font-size: 1.5rem;
+      margin: 1rem;
+    }}
   </style>
 </head>
 <body>
-  <h1>🛰️ Ảnh Radar Mới Nhất</h1>
-  <img id="radar-image" src="rada/%s">
-  <div id="timestamp">🕒 Giờ radar: Không rõ</div>
+  <div id="time">🕒 Giờ radar: {latest_time}</div>
+  <img id="radar" src="rada/{image_list[-1]}" alt="Ảnh radar mới nhất">
   <script>
-    const images = [%s];
-    let current = 0;
-    const imgTag = document.getElementById("radar-image");
-    function updateImage() {
-      imgTag.src = images[current];
-      current = (current + 1) %% images.length;
-    }
-    setInterval(updateImage, 1000);
-    const lastImage = images[images.length - 1];
-    const match = lastImage.match(/(\\d{12})\\.MAX\\d{4}/);
-    if (match) {
-      const timePart = match[1];
-      const nam = timePart.slice(0,2);
-      const thang = timePart.slice(2,4);
-      const ngay = timePart.slice(4,6);
-      const gio = timePart.slice(6,8);
-      const phut = timePart.slice(8,10);
-      const giay = timePart.slice(10,12);
-      document.getElementById("timestamp").innerText = 
-        `🕒 Giờ radar: ${gio}:${phut}:${giay} ngày ${ngay}/${thang}/20${nam}`;
-    }
+    const images = [{', '.join([f'"rada/{img}"' for img in image_list])}];
+    let index = 0;
+    setInterval(() => {{
+      index = (index + 1) % images.length;
+      document.getElementById('radar').src = images[index];
+    }}, 1000);
   </script>
 </body>
-</html>""" % (image_list[-1], ', '.join([f'"rada/{img}"' for img in image_list])))
+</html>""")
 
-def git_commit_push():
+def run_git_commands():
     try:
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
@@ -84,11 +106,13 @@ def git_commit_push():
 
 def main():
     print("🚀 Đang cập nhật ảnh radar...")
-    latest_images = copy_latest_images()
-    delete_old_images(DEST_FOLDER, latest_images)
+    os.makedirs(TARGET_FOLDER, exist_ok=True)
+    delete_old_images()
+    copied = copy_new_images()
+    latest_images = get_latest_images()
     generate_html(latest_images)
     print("✅ Đã cập nhật danh sách ảnh vào index.html")
-    git_commit_push()
+    run_git_commands()
 
 if __name__ == "__main__":
     main()

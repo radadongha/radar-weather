@@ -2,39 +2,40 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="300">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ảnh Radar Thời Tiết</title>
   <style>
-    body { background-color: black; color: white; text-align: center; font-family: Arial, sans-serif; }
-    img { max-width: 90%; max-height: 90%; margin: 0 auto; display: block; }
-    #timestamp { margin-top: 10px; font-size: 1.2em; color: #ccc; }
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    img {
+      max-width: 90vw;
+      max-height: 90vh;
+      display: block;
+      margin: 0 auto;
+    }
+    #time {
+      font-size: 1.5rem;
+      margin: 1rem;
+    }
   </style>
 </head>
 <body>
-  <h1>🛰️ Ảnh Radar Mới Nhất</h1>
-  <img id="radar-image" src="rada/dong-ha-mon250721125005.MAX0072.jpg">
-  <div id="timestamp">🕒 Giờ radar: Không rõ</div>
+  <div id="time">🕒 Giờ radar: 2025-07-21 13:00</div>
+  <img id="radar" src="rada/dong-ha-mon250721130004.MAX0073.jpg" alt="Ảnh radar mới nhất">
   <script>
-    const images = ["rada/dong-ha-mon250721133004.MAX0076.jpg", "rada/dong-ha-mon250721132004.MAX0075.jpg", "rada/dong-ha-mon250721131005.MAX0074.jpg", "rada/dong-ha-mon250721130004.MAX0073.jpg", "rada/dong-ha-mon250721125005.MAX0072.jpg"];
-    let current = 0;
-    const imgTag = document.getElementById("radar-image");
-    function updateImage() {
-      imgTag.src = images[current];
-      current = (current + 1) % images.length;
-    }
-    setInterval(updateImage, 1000);
-    const lastImage = images[images.length - 1];
-    const match = lastImage.match(/(\d{12})\.MAX\d{4}/);
-    if (match) {
-      const timePart = match[1];
-      const nam = timePart.slice(0,2);
-      const thang = timePart.slice(2,4);
-      const ngay = timePart.slice(4,6);
-      const gio = timePart.slice(6,8);
-      const phut = timePart.slice(8,10);
-      const giay = timePart.slice(10,12);
-      document.getElementById("timestamp").innerText = 
-        `🕒 Giờ radar: ${gio}:${phut}:${giay} ngày ${ngay}/${thang}/20${nam}`;
-    }
+    const images = ["rada/dong-ha-mon250721134004.MAX0077.jpg", "rada/dong-ha-mon250721133004.MAX0076.jpg", "rada/dong-ha-mon250721132004.MAX0075.jpg", "rada/dong-ha-mon250721131005.MAX0074.jpg", "rada/dong-ha-mon250721130004.MAX0073.jpg"];
+    let index = 0;
+    setInterval(() => {
+      index = (index + 1) % images.length;
+      document.getElementById('radar').src = images[index];
+    }, 1000);
   </script>
 </body>
 </html>
