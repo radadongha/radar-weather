@@ -10,10 +10,12 @@
             text-align: center;
             background: #000;
             color: #fff;
+            margin: 0;
+            padding: 0;
         }
         img {
-            max-width: 120vw;
-            max-height: 120vh;
+            max-width: 100vw;
+            max-height: 90vh;
             display: block;
             margin: 10px auto;
         }
@@ -22,13 +24,23 @@
             margin: 10px;
         }
         .controls {
-            margin-top: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         button {
             font-size: 20px;
-            padding: 10px;
-            margin: 5px;
+            padding: 10px 16px;
             cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #444;
+            color: #fff;
+        }
+        button:hover {
+            background: #666;
         }
     </style>
 </head>
@@ -41,6 +53,7 @@
         <button onclick="prevImage()">⏮️</button>
         <button onclick="togglePlay()" id="playBtn">▶️</button>
         <button onclick="nextImage()">⏭️</button>
+        <button onclick="toggleFullscreen()">🖥️ Full màn hình</button>
     </div>
 
     <script>
@@ -78,6 +91,19 @@
                 clearInterval(interval);
             }
         }
+
+        function toggleFullscreen() {
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement) {
+                docEl.requestFullscreen().catch(err => {
+                    alert("Không thể vào full màn hình: " + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        updateImage();
     </script>
 </body>
 </html>

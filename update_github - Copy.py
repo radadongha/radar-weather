@@ -37,9 +37,6 @@ def generate_html(image_paths):
         dt = extract_datetime(name)
         times.append(dt.strftime("%H:%M %d/%m") if dt else "Không rõ")
 
-    image_list_js = str([f"rada/{img}" for img in image_files])
-    time_list_js = str(times)
-
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
 <html lang="vi">
@@ -53,12 +50,10 @@ def generate_html(image_paths):
             text-align: center;
             background: #000;
             color: #fff;
-            margin: 0;
-            padding: 0;
         }}
         img {{
-            max-width: 100vw;
-            max-height: 90vh;
+            max-width: 120vw;
+            max-height: 120vh;
             display: block;
             margin: 10px auto;
         }}
@@ -67,23 +62,13 @@ def generate_html(image_paths):
             margin: 10px;
         }}
         .controls {{
-            margin: 10px 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            margin-top: 10px;
         }}
         button {{
             font-size: 20px;
-            padding: 10px 16px;
+            padding: 10px;
+            margin: 5px;
             cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background: #444;
-            color: #fff;
-        }}
-        button:hover {{
-            background: #666;
         }}
     </style>
 </head>
@@ -96,12 +81,11 @@ def generate_html(image_paths):
         <button onclick="prevImage()">⏮️</button>
         <button onclick="togglePlay()" id="playBtn">▶️</button>
         <button onclick="nextImage()">⏭️</button>
-        <button onclick="toggleFullscreen()">🖥️ Full màn hình</button>
     </div>
 
     <script>
-        const imageList = {image_list_js};
-        const imageTimes = {time_list_js};
+        const imageList = { [f"rada/{img}" for img in image_files] };
+        const imageTimes = {times};
         let currentIndex = imageList.length - 1;
         let playing = false;
         let interval;
@@ -134,19 +118,6 @@ def generate_html(image_paths):
                 clearInterval(interval);
             }}
         }}
-
-        function toggleFullscreen() {{
-            const docEl = document.documentElement;
-            if (!document.fullscreenElement) {{
-                docEl.requestFullscreen().catch(err => {{
-                    alert("Không thể vào full màn hình: " + err.message);
-                }});
-            }} else {{
-                document.exitFullscreen();
-            }}
-        }}
-
-        updateImage();
     </script>
 </body>
 </html>
@@ -177,7 +148,7 @@ def main():
     copy_images_to_target(latest_images)
     delete_old_images()
     generate_html(latest_images)
-    print("✅ Đã cập nhật index.html với nút Full màn hình + ảnh mới nhất")
+    print("✅ Đã cập nhật index.html với giờ radar từng ảnh và nút điều khiển")
     run_git_commands()
 
 if __name__ == "__main__":
