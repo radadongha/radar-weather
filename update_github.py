@@ -35,7 +35,7 @@ def generate_html(image_paths):
     times = []
     for name in image_files:
         dt = extract_datetime(name)
-        times.append(dt.strftime("%H:%M %d/%m") if dt else "Không rõ")
+        times.append(dt.strftime("%H:%M %d/%m/%Y") if dt else "Không rõ")
 
     image_list_js = str([f"rada/{img}" for img in image_files])
     time_list_js = str(times)
@@ -68,11 +68,6 @@ def generate_html(image_paths):
             height: auto;
             margin-top: 10px;
         }}
-        #time {{
-            font-size: 14px;
-            margin: 10px 0;
-            text-align: center;
-        }}
         .controls-container {{
             position: absolute;
             top: 50%;
@@ -99,11 +94,21 @@ def generate_html(image_paths):
         button:hover {{
             background: #666;
         }}
+        #time-display {{
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 8px;
+            z-index: 999;
+        }}
     </style>
 </head>
 <body>
-    <h2 style="text-align:center;">Radar Thời Tiết</h2>
-    <div id="time">Giờ radar: {times[-1]}</div>
+    <div id="time-display">🕒 Giờ radar: {times[-1]}</div>
 
     <div class="wrapper">
         <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar">
@@ -126,12 +131,12 @@ def generate_html(image_paths):
         let interval;
 
         const imgElement = document.getElementById("radarImage");
-        const timeElement = document.getElementById("time");
+        const timeElement = document.getElementById("time-display");
         const playBtn = document.getElementById("playBtn");
 
         function updateImage() {{
             imgElement.src = imageList[currentIndex];
-            timeElement.textContent = "Giờ radar: " + imageTimes[currentIndex];
+            timeElement.textContent = "🕒 Giờ radar: " + imageTimes[currentIndex];
         }}
 
         function prevImage() {{
@@ -196,7 +201,7 @@ def main():
     copy_images_to_target(latest_images)
     delete_old_images()
     generate_html(latest_images)
-    print("✅ Đã cập nhật index.html với nút bên phải ảnh")
+    print("✅ Đã cập nhật index.html với giờ radar bên trái và có năm")
     run_git_commands()
 
 if __name__ == "__main__":

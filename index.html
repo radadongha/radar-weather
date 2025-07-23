@@ -25,11 +25,6 @@
             height: auto;
             margin-top: 10px;
         }
-        #time {
-            font-size: 14px;
-            margin: 10px 0;
-            text-align: center;
-        }
         .controls-container {
             position: absolute;
             top: 50%;
@@ -56,11 +51,21 @@
         button:hover {
             background: #666;
         }
+        #time-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 8px;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
-    <h2 style="text-align:center;">Radar Thời Tiết</h2>
-    <div id="time">Giờ radar: 08:00 23/07</div>
+    <div id="time-display">🕒 Giờ radar: 08:00 23/07/2025</div>
 
     <div class="wrapper">
         <img id="radarImage" src="rada/dong-ha-mon250723080005.MAX0331.jpg" alt="Radar">
@@ -77,18 +82,18 @@
 
     <script>
         const imageList = ['rada/dong-ha-mon250723072004.MAX0327.jpg', 'rada/dong-ha-mon250723073005.MAX0328.jpg', 'rada/dong-ha-mon250723074004.MAX0329.jpg', 'rada/dong-ha-mon250723075005.MAX0330.jpg', 'rada/dong-ha-mon250723080005.MAX0331.jpg'];
-        const imageTimes = ['07:20 23/07', '07:30 23/07', '07:40 23/07', '07:50 23/07', '08:00 23/07'];
+        const imageTimes = ['07:20 23/07/2025', '07:30 23/07/2025', '07:40 23/07/2025', '07:50 23/07/2025', '08:00 23/07/2025'];
         let currentIndex = imageList.length - 1;
         let playing = false;
         let interval;
 
         const imgElement = document.getElementById("radarImage");
-        const timeElement = document.getElementById("time");
+        const timeElement = document.getElementById("time-display");
         const playBtn = document.getElementById("playBtn");
 
         function updateImage() {
             imgElement.src = imageList[currentIndex];
-            timeElement.textContent = "Giờ radar: " + imageTimes[currentIndex];
+            timeElement.textContent = "🕒 Giờ radar: " + imageTimes[currentIndex];
         }
 
         function prevImage() {
