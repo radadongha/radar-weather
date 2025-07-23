@@ -50,37 +50,49 @@ def generate_html(image_paths):
     <style>
         body {{
             font-family: Arial, sans-serif;
-            text-align: center;
             background: #000;
             color: #fff;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }}
-       img {{
-    	width: 90vw !important;
-   	 height: auto !important;
-    	display: block;
-   	 margin: 5 auto;
-	}}
-
-        }}
-        #time {{
-            font-size: 10px;
-            margin: 5px;
-        }}
-        .controls {{
-            margin: 7px 0;
+        .wrapper {{
+            position: relative;
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 7px;
+            align-items: center;
+            flex-direction: column;
+        }}
+        #radarImage {{
+            width: 90vw;
+            height: auto;
+            margin-top: 10px;
+        }}
+        #time {{
+            font-size: 14px;
+            margin: 10px 0;
+            text-align: center;
+        }}
+        .controls-container {{
+            position: absolute;
+            top: 50%;
+            right: 5vw;
+            transform: translateY(-50%);
+        }}
+        .controls {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 10px;
         }}
         button {{
-            font-size: 8px;
-            padding: 10px 16px;
+            font-size: 14px;
+            padding: 10px 14px;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             background: #444;
             color: #fff;
         }}
@@ -90,18 +102,21 @@ def generate_html(image_paths):
     </style>
 </head>
 <body>
-    <h1>Radar Thời Tiết</h1>
+    <h2 style="text-align:center;">Radar Thời Tiết</h2>
     <div id="time">Giờ radar: {times[-1]}</div>
-    <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar" />
 
-   <div class="controls-container">
-    <div class="controls">
-        <button onclick="prevImage()">⏮️</button>
-        <button onclick="togglePlay()" id="playBtn">▶️</button>
-        <button onclick="nextImage()">⏭️</button>
-        <button onclick="toggleFullscreen()">🖥️ Full màn hình</button>
+    <div class="wrapper">
+        <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar">
+
+        <div class="controls-container">
+            <div class="controls">
+                <button onclick="prevImage()">⏮️</button>
+                <button onclick="togglePlay()" id="playBtn">▶️</button>
+                <button onclick="nextImage()">⏭️</button>
+                <button onclick="toggleFullscreen()">🖥️</button>
+            </div>
+        </div>
     </div>
-</div>
 
     <script>
         const imageList = {image_list_js};
@@ -181,7 +196,7 @@ def main():
     copy_images_to_target(latest_images)
     delete_old_images()
     generate_html(latest_images)
-    print("✅ Đã cập nhật index.html với nút Full màn hình + ảnh mới nhất")
+    print("✅ Đã cập nhật index.html với nút bên phải ảnh")
     run_git_commands()
 
 if __name__ == "__main__":
