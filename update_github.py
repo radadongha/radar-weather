@@ -57,10 +57,10 @@ def generate_html(image_paths):
             padding: 0;
         }}
        img {{
-    width: 80vw !important;
+    width: 90vw !important;
     height: auto !important;
     display: block;
-    margin: 0 auto;
+    margin: 5 auto;
 	}}
 
         }}
@@ -76,7 +76,7 @@ def generate_html(image_paths):
             gap: 10px;
         }}
         button {{
-            font-size: 20px;
+            font-size: 10px;
             padding: 10px 16px;
             cursor: pointer;
             border: none;
