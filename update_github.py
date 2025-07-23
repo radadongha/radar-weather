@@ -60,7 +60,7 @@ def generate_html(image_paths):
     width: 80vw !important;
     height: auto !important;
     display: block;
-    margin: 5 auto;
+    margin: 0 auto;
 	}}
 
         }}
