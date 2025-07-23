@@ -60,7 +60,7 @@ def generate_html(image_paths):
             max-width: 100vw;
             max-height: 100vh;
             display: block;
-            margin: 2px auto;
+            margin: 0px auto;
         }}
         #time {{
             font-size: 20px;
