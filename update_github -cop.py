@@ -57,10 +57,10 @@ def generate_html(image_paths):
             padding: 0;
         }}
         img {{
-            max-width: 100vw;
-            max-height: 100vh;
-            display: block;
-            margin: 0px auto;
+            width: 80vw !important;
+    	    height: auto !important;
+    	    display: block;
+    	    margin: 0 auto;
         }}
         #time {{
             font-size: 20px;
@@ -74,7 +74,7 @@ def generate_html(image_paths):
             gap: 10px;
         }}
         button {{
-            font-size: 20px;
+            font-size: 10px;
             padding: 10px 16px;
             cursor: pointer;
             border: none;
