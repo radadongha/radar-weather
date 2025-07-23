@@ -69,15 +69,15 @@ def generate_html(image_paths):
             margin: 10px;
         }}
         .controls {{
-            margin: 10px 0;
+            margin: 5px 0;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 5px;
         }}
         button {{
             font-size: 4px;
-            padding: 10px 16px;
+            padding: 5px 8px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
