@@ -57,8 +57,8 @@ def generate_html(image_paths):
             padding: 0;
         }}
         img {{
-            max-width: 150vw;
-            max-height: 150vh;
+            max-width: 100vw;
+            max-height: 100vh;
             display: block;
             margin: 10px auto;
         }}
