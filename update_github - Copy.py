@@ -32,10 +32,11 @@ def copy_images_to_target(images):
 
 def generate_html(image_paths):
     image_files = [os.path.basename(path) for path in image_paths]
-    times = []
-    for name in image_files:
-        dt = extract_datetime(name)
-        times.append(dt.strftime("%H:%M %d/%m") if dt else "Không rõ")
+    latest_time = extract_datetime(image_files[-1])
+    if latest_time:
+        radar_time = latest_time.strftime("%H:%M %d/%m/%Y")
+    else:
+        radar_time = "Không rõ"
 
     with open(HTML_FILE, "w", encoding="utf-8") as f:
         f.write(f"""<!DOCTYPE html>
@@ -52,72 +53,28 @@ def generate_html(image_paths):
             color: #fff;
         }}
         img {{
-            max-width: 90vw;
-            max-height: 80vh;
+            max-width: 120vw;
+            max-height: 120vh;
             display: block;
-            margin: 10px auto;
+            margin: 20px auto;
         }}
         #time {{
             font-size: 20px;
-            margin: 10px;
-        }}
-        .controls {{
             margin-top: 10px;
-        }}
-        button {{
-            font-size: 20px;
-            padding: 10px;
-            margin: 5px;
-            cursor: pointer;
         }}
     </style>
 </head>
 <body>
-    <h1>Radar Thời Tiết</h1>
-    <div id="time">Giờ radar: {times[-1]}</div>
-    <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar" />
-
-    <div class="controls">
-        <button onclick="prevImage()">⏮️</button>
-        <button onclick="togglePlay()" id="playBtn">▶️</button>
-        <button onclick="nextImage()">⏭️</button>
-    </div>
-
+    <h1>  Radar Thời Tiết</h1>
+    <div id="time"> Giờ radar: {radar_time}</div>
+    <img id="radar" src="rada/{image_files[-1]}" alt="Radar">
     <script>
-        const imageList = { [f"rada/{img}" for img in image_files] };
-        const imageTimes = {times};
-        let currentIndex = imageList.length - 1;
-        let playing = false;
-        let interval;
-
-        const imgElement = document.getElementById("radarImage");
-        const timeElement = document.getElementById("time");
-        const playBtn = document.getElementById("playBtn");
-
-        function updateImage() {{
-            imgElement.src = imageList[currentIndex];
-            timeElement.textContent = "Giờ radar: " + imageTimes[currentIndex];
-        }}
-
-        function prevImage() {{
-            currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
-            updateImage();
-        }}
-
-        function nextImage() {{
-            currentIndex = (currentIndex + 1) % imageList.length;
-            updateImage();
-        }}
-
-        function togglePlay() {{
-            playing = !playing;
-            playBtn.textContent = playing ? "⏸️" : "▶️";
-            if (playing) {{
-                interval = setInterval(nextImage, 800);
-            }} else {{
-                clearInterval(interval);
-            }}
-        }}
+        const images = [{', '.join([f'"rada/{img}"' for img in image_files])}];
+        let index = 0;
+        setInterval(() => {{
+            index = (index + 1) % images.length;
+            document.getElementById("radar").src = images[index];
+        }}, 1000);
     </script>
 </body>
 </html>
@@ -148,7 +105,7 @@ def main():
     copy_images_to_target(latest_images)
     delete_old_images()
     generate_html(latest_images)
-    print("✅ Đã cập nhật index.html với giờ radar từng ảnh và nút điều khiển")
+    print("✅ Đã cập nhật danh sách ảnh vào index.html")
     run_git_commands()
 
 if __name__ == "__main__":

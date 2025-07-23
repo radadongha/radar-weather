@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Radar Thời Tiết</title>
+    <meta http-equiv="refresh" content="300">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #000;
+            color: #fff;
+        }
+        img {
+            max-width: 120vw;
+            max-height: 120vh;
+            display: block;
+            margin: 20px auto;
+        }
+        #time {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>  Radar Thời Tiết</h1>
+    <div id="time"> Giờ radar: 01:50 23/07/2025</div>
+    <img id="radar" src="rada/dong-ha-mon250723015005.MAX0294.jpg" alt="Radar">
+    <script>
+        const images = ["rada/dong-ha-mon250723011004.MAX0290.jpg", "rada/dong-ha-mon250723012005.MAX0291.jpg", "rada/dong-ha-mon250723013004.MAX0292.jpg", "rada/dong-ha-mon250723014004.MAX0293.jpg", "rada/dong-ha-mon250723015005.MAX0294.jpg"];
+        let index = 0;
+        setInterval(() => {
+            index = (index + 1) % images.length;
+            document.getElementById("radar").src = images[index];
+        }, 1000);
+    </script>
+</body>
+</html>
