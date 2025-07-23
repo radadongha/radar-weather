@@ -76,7 +76,7 @@ def generate_html(image_paths):
             gap: 10px;
         }}
         button {{
-            font-size: 8px;
+            font-size: 4px;
             padding: 10px 16px;
             cursor: pointer;
             border: none;
