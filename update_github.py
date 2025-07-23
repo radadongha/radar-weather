@@ -56,11 +56,13 @@ def generate_html(image_paths):
             margin: 0;
             padding: 0;
         }}
-        img {{
-            max-width: 100vw;
-            max-height: 100vh;
-            display: block;
-            margin: 10px auto;
+       img {{
+    width: 100vw !important;
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+	}}
+
         }}
         #time {{
             font-size: 20px;
