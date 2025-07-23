@@ -10,10 +10,12 @@
             text-align: center;
             background: #000;
             color: #fff;
+            margin: 0;
+            padding: 0;
         }
         img {
-            max-width: 120vw;
-            max-height: 120vh;
+            max-width: 100vw;
+            max-height: 100vh;
             display: block;
             margin: 10px auto;
         }
@@ -22,30 +24,41 @@
             margin: 10px;
         }
         .controls {
-            margin-top: 10px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         button {
             font-size: 20px;
-            padding: 10px;
-            margin: 5px;
+            padding: 10px 16px;
             cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #444;
+            color: #fff;
+        }
+        button:hover {
+            background: #666;
         }
     </style>
 </head>
 <body>
     <h1>Radar Thời Tiết</h1>
-    <div id="time">Giờ radar: 02:30 23/07</div>
-    <img id="radarImage" src="rada/dong-ha-mon250723023005.MAX0298.jpg" alt="Radar" />
+    <div id="time">Giờ radar: 05:00 23/07</div>
+    <img id="radarImage" src="rada/dong-ha-mon250723050005.MAX0313.jpg" alt="Radar" />
 
     <div class="controls">
         <button onclick="prevImage()">⏮️</button>
         <button onclick="togglePlay()" id="playBtn">▶️</button>
         <button onclick="nextImage()">⏭️</button>
+        <button onclick="toggleFullscreen()">🖥️ Full màn hình</button>
     </div>
 
     <script>
-        const imageList = ['rada/dong-ha-mon250723015005.MAX0294.jpg', 'rada/dong-ha-mon250723020004.MAX0295.jpg', 'rada/dong-ha-mon250723021005.MAX0296.jpg', 'rada/dong-ha-mon250723022005.MAX0297.jpg', 'rada/dong-ha-mon250723023005.MAX0298.jpg'];
-        const imageTimes = ['01:50 23/07', '02:00 23/07', '02:10 23/07', '02:20 23/07', '02:30 23/07'];
+        const imageList = ['rada/dong-ha-mon250723042004.MAX0309.jpg', 'rada/dong-ha-mon250723043004.MAX0310.jpg', 'rada/dong-ha-mon250723044004.MAX0311.jpg', 'rada/dong-ha-mon250723045004.MAX0312.jpg', 'rada/dong-ha-mon250723050005.MAX0313.jpg'];
+        const imageTimes = ['04:20 23/07', '04:30 23/07', '04:40 23/07', '04:50 23/07', '05:00 23/07'];
         let currentIndex = imageList.length - 1;
         let playing = false;
         let interval;
@@ -78,6 +91,19 @@
                 clearInterval(interval);
             }
         }
+
+        function toggleFullscreen() {
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement) {
+                docEl.requestFullscreen().catch(err => {
+                    alert("Không thể vào full màn hình: " + err.message);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        updateImage();
     </script>
 </body>
 </html>
