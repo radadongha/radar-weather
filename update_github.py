@@ -57,7 +57,7 @@ def generate_html(image_paths):
             padding: 0;
         }}
        img {{
-    width: 100vw !important;
+    width: 95vw !important;
     height: auto !important;
     display: block;
     margin: 0 auto;
