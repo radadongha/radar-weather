@@ -182,3 +182,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+import os
+import glob
+
+def generate_radar_js(radar_dir='rada', output_file='radar_images.js', max_images=5):
+    # Tìm tất cả ảnh PNG trong thư mục
+    image_files = sorted(
+        glob.glob(os.path.join(radar_dir, "*.png")),
+        key=os.path.getmtime
+    )
+
+    # Lấy ảnh mới nhất (tối đa max_images ảnh)
+    latest_images = image_files[-max_images:]
+
+    # Chuyển đường dẫn sang dạng tương đối để dùng trong JS
+    image_paths = [f.replace("\\", "/") for f in latest_images]
+
+    # Tạo nội dung file JS
+    js_content = "const radarImages = [\n"
+    for path in image_paths:
+        js_content += f'  "{path}",\n'
+    js_content += "];\n"
+
+    # Ghi vào file
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(js_content)
+    
+    print(f"✅ Đã tạo file {output_file} với {len(image_paths)} ảnh radar mới nhất.")
+
+# Gọi hàm sau khi cập nhật ảnh xong
+generate_radar_js()
+
