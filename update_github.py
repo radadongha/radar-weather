@@ -7,28 +7,37 @@ import subprocess
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
+MAX_IMAGES = 5
 
 def extract_datetime(filename):
-    name = os.path.basename(filename)
     try:
+        name = os.path.basename(filename)
         y = int(name[11:13]) + 2000
         m = int(name[13:15])
         d = int(name[15:17])
-        H = int(name[17:19])
-        M = int(name[19:21])
-        return datetime.datetime(y, m, d, H, M)
-    except Exception:
+        h = int(name[17:19])
+        mi = int(name[19:21])
+        return datetime.datetime(y, m, d, h, mi)
+    except:
         return None
 
-def get_latest_images(n=5):
-    all_images = glob.glob(os.path.join(SOURCE_DIR, "*.MAX*.jpg"))
-    sorted_images = sorted(all_images, key=extract_datetime)
-    return sorted_images[-n:]
+def get_latest_images():
+    files = glob.glob(os.path.join(SOURCE_DIR, "*.jpg"))
+    files.sort(key=lambda x: extract_datetime(x) or datetime.datetime.min)
+    return files[-MAX_IMAGES:]
 
-def copy_images_to_target(images):
-    os.makedirs(TARGET_DIR, exist_ok=True)
-    for img_path in images:
-        shutil.copy2(img_path, os.path.join(TARGET_DIR, os.path.basename(img_path)))
+def copy_images_to_target(files):
+    if not os.path.exists(TARGET_DIR):
+        os.makedirs(TARGET_DIR)
+    for file in files:
+        shutil.copy(file, os.path.join(TARGET_DIR, os.path.basename(file)))
+
+def delete_old_images():
+    now = datetime.datetime.now()
+    for file in glob.glob(os.path.join(TARGET_DIR, "*.jpg")):
+        dt = extract_datetime(file)
+        if dt and (now - dt).days >= 1:
+            os.remove(file)
 
 def generate_html(image_paths):
     image_files = [os.path.basename(path) for path in image_paths]
@@ -57,22 +66,24 @@ def generate_html(image_paths):
             overflow-x: hidden;
         }}
         .wrapper {{
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            margin-top: 20px;
+        }}
+        #time-display {{
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 8px 14px;
+            border-radius: 10px;
+            margin-right: 12px;
+            text-align: center;
+            white-space: nowrap;
         }}
         #radarImage {{
             width: 90vw;
+            max-width: 800px;
             height: auto;
-            margin-top: 10px;
-        }}
-        .controls-container {{
-            position: absolute;
-            top: 50%;
-            right: 5vw;
-            transform: translateY(-50%);
         }}
         .controls {{
             display: flex;
@@ -81,6 +92,7 @@ def generate_html(image_paths):
             background: rgba(0, 0, 0, 0.5);
             padding: 8px;
             border-radius: 10px;
+            margin-left: 12px;
         }}
         button {{
             font-size: 14px;
@@ -94,32 +106,21 @@ def generate_html(image_paths):
         button:hover {{
             background: #666;
         }}
-        #time-display {{
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 16px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 6px 12px;
-            border-radius: 8px;
-            z-index: 999;
-        }}
     </style>
 </head>
 <body>
-    <div id="time-display">🕒 Giờ radar: {times[-1]}</div>
+    <h2 style="text-align:center;">Radar Thời Tiết</h2>
 
     <div class="wrapper">
+        <div id="time-display">{times[-1]}</div>
+
         <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar">
 
-        <div class="controls-container">
-            <div class="controls">
-                <button onclick="prevImage()">⏮️</button>
-                <button onclick="togglePlay()" id="playBtn">▶️</button>
-                <button onclick="nextImage()">⏭️</button>
-                <button onclick="toggleFullscreen()">🖥️</button>
-            </div>
+        <div class="controls">
+            <button onclick="prevImage()">⏮️</button>
+            <button onclick="togglePlay()" id="playBtn">▶️</button>
+            <button onclick="nextImage()">⏭️</button>
+            <button onclick="toggleFullscreen()">🖥️</button>
         </div>
     </div>
 
@@ -136,7 +137,7 @@ def generate_html(image_paths):
 
         function updateImage() {{
             imgElement.src = imageList[currentIndex];
-            timeElement.textContent = "🕒 Giờ radar: " + imageTimes[currentIndex];
+            timeElement.textContent = imageTimes[currentIndex];
         }}
 
         function prevImage() {{
@@ -176,33 +177,19 @@ def generate_html(image_paths):
 </html>
 """)
 
-def delete_old_images(days=1):
-    now = datetime.datetime.now()
-    for f in glob.glob(os.path.join(TARGET_DIR, "*.jpg")):
-        t = datetime.datetime.fromtimestamp(os.path.getmtime(f))
-        if (now - t).days >= days:
-            os.remove(f)
-
-def run_git_commands():
+def git_commit_and_push():
     try:
         subprocess.run(["git", "add", "."], check=True)
-        result = subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=False)
-        if result.returncode == 0:
-            subprocess.run(["git", "push"], check=True)
-            print("✅ Đã đẩy lên GitHub thành công.")
-        else:
-            print("ℹ️ Không có thay đổi để commit.")
+        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("✅ Đã cập nhật lên GitHub")
     except subprocess.CalledProcessError as e:
         print("❌ Lỗi Git:", e)
 
-def main():
+if __name__ == "__main__":
     print("🚀 Đang cập nhật ảnh radar...")
     latest_images = get_latest_images()
     copy_images_to_target(latest_images)
     delete_old_images()
     generate_html(latest_images)
-    print("✅ Đã cập nhật index.html với giờ radar bên trái và có năm")
-    run_git_commands()
-
-if __name__ == "__main__":
-    main()
+    git_commit_and_push()

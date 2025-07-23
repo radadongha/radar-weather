@@ -14,22 +14,24 @@
             overflow-x: hidden;
         }
         .wrapper {
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            margin-top: 20px;
+        }
+        #time-display {
+            font-size: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 8px 14px;
+            border-radius: 10px;
+            margin-right: 12px;
+            text-align: center;
+            white-space: nowrap;
         }
         #radarImage {
             width: 90vw;
+            max-width: 800px;
             height: auto;
-            margin-top: 10px;
-        }
-        .controls-container {
-            position: absolute;
-            top: 50%;
-            right: 5vw;
-            transform: translateY(-50%);
         }
         .controls {
             display: flex;
@@ -38,6 +40,7 @@
             background: rgba(0, 0, 0, 0.5);
             padding: 8px;
             border-radius: 10px;
+            margin-left: 12px;
         }
         button {
             font-size: 14px;
@@ -51,38 +54,27 @@
         button:hover {
             background: #666;
         }
-        #time-display {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-size: 16px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 6px 12px;
-            border-radius: 8px;
-            z-index: 999;
-        }
     </style>
 </head>
 <body>
-    <div id="time-display">🕒 Giờ radar: 08:10 23/07/2025</div>
+    <h2 style="text-align:center;">Radar Thời Tiết</h2>
 
     <div class="wrapper">
-        <img id="radarImage" src="rada/dong-ha-mon250723081004.MAX0332.jpg" alt="Radar">
+        <div id="time-display">08:20 23/07/2025</div>
 
-        <div class="controls-container">
-            <div class="controls">
-                <button onclick="prevImage()">⏮️</button>
-                <button onclick="togglePlay()" id="playBtn">▶️</button>
-                <button onclick="nextImage()">⏭️</button>
-                <button onclick="toggleFullscreen()">🖥️</button>
-            </div>
+        <img id="radarImage" src="rada/dong-ha-mon250723082005.MAX0333.jpg" alt="Radar">
+
+        <div class="controls">
+            <button onclick="prevImage()">⏮️</button>
+            <button onclick="togglePlay()" id="playBtn">▶️</button>
+            <button onclick="nextImage()">⏭️</button>
+            <button onclick="toggleFullscreen()">🖥️</button>
         </div>
     </div>
 
     <script>
-        const imageList = ['rada/dong-ha-mon250723073005.MAX0328.jpg', 'rada/dong-ha-mon250723074004.MAX0329.jpg', 'rada/dong-ha-mon250723075005.MAX0330.jpg', 'rada/dong-ha-mon250723080005.MAX0331.jpg', 'rada/dong-ha-mon250723081004.MAX0332.jpg'];
-        const imageTimes = ['07:30 23/07/2025', '07:40 23/07/2025', '07:50 23/07/2025', '08:00 23/07/2025', '08:10 23/07/2025'];
+        const imageList = ['rada/dong-ha-mon250723074004.MAX0329.jpg', 'rada/dong-ha-mon250723075005.MAX0330.jpg', 'rada/dong-ha-mon250723080005.MAX0331.jpg', 'rada/dong-ha-mon250723081004.MAX0332.jpg', 'rada/dong-ha-mon250723082005.MAX0333.jpg'];
+        const imageTimes = ['07:40 23/07/2025', '07:50 23/07/2025', '08:00 23/07/2025', '08:10 23/07/2025', '08:20 23/07/2025'];
         let currentIndex = imageList.length - 1;
         let playing = false;
         let interval;
@@ -93,7 +85,7 @@
 
         function updateImage() {
             imgElement.src = imageList[currentIndex];
-            timeElement.textContent = "🕒 Giờ radar: " + imageTimes[currentIndex];
+            timeElement.textContent = imageTimes[currentIndex];
         }
 
         function prevImage() {
