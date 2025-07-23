@@ -94,12 +94,14 @@ def generate_html(image_paths):
     <div id="time">Giờ radar: {times[-1]}</div>
     <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar" />
 
+   <div class="controls-container">
     <div class="controls">
         <button onclick="prevImage()">⏮️</button>
         <button onclick="togglePlay()" id="playBtn">▶️</button>
         <button onclick="nextImage()">⏭️</button>
         <button onclick="toggleFullscreen()">🖥️ Full màn hình</button>
     </div>
+</div>
 
     <script>
         const imageList = {image_list_js};
