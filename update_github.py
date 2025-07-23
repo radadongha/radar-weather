@@ -53,8 +53,8 @@ def generate_html(image_paths):
             color: #fff;
         }}
         img {{
-            max-width: 100vw;
-            max-height: 100vh;
+            max-width: 120vw;
+            max-height: 120vh;
             display: block;
             margin: 20px auto;
         }}
