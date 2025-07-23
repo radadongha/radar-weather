@@ -65,8 +65,8 @@ def generate_html(image_paths):
 
         }}
         #time {{
-            font-size: 20px;
-            margin: 10px;
+            font-size: 10px;
+            margin: 5px;
         }}
         .controls {{
             margin: 5px 0;
