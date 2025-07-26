@@ -1,125 +1,123 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Radar Thời Tiết</title>
-    <meta http-equiv="refresh" content="300">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        .wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-        #time-display {
-            font-size: 16px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 8px 14px;
-            border-radius: 10px;
-            margin-right: 12px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        #radarImage {
-            width: 90vw;
-            max-width: 800px;
-            height: auto;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px;
-            border-radius: 10px;
-            margin-left: 12px;
-        }
-        button {
-            font-size: 14px;
-            padding: 10px 14px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-            background: #444;
-            color: #fff;
-        }
-        button:hover {
-            background: #666;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Radar Thời Tiết</title>
+<meta http-equiv="refresh" content="600">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .image-container {
+        position: relative;
+        display: inline-block;
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+
+    .timestamp {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0,0,0,0.7);
+        padding: 4px 12px;
+        border-radius: 10px;
+        font-size: 18px;
+        z-index: 10;
+    }
+
+    img {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+
+    .controls {
+        margin: 10px;
+        font-size: 24px;
+    }
+
+    button {
+        font-size: 20px;
+        padding: 6px 10px;
+        margin: 0 5px;
+        border-radius: 8px;
+        border: none;
+        background-color: #333;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555;
+    }
+</style>
 </head>
 <body>
-    <h2 style="text-align:center;">Radar Thời Tiết</h2>
+<h2>🛰️ Ảnh Radar Thời Tiết</h2>
 
-    <div class="wrapper">
-        <div id="time-display">09:10 26/07/2025</div>
+<div class="controls">
+    <button onclick="prevImage()">⏮️</button>
+    <button onclick="togglePlay()">⏯️</button>
+    <button onclick="nextImage()">⏭️</button>
+    <button onclick="openFullscreen()">🖥️</button>
+</div>
 
-        <img id="radarImage" src="rada/dong-ha-mon250726091004.MAX0752.jpg" alt="Radar">
+<div class="image-container">
+    <div class="timestamp" id="timestamp"></div>
+    <img id="radar" src="" alt="Radar Image">
+</div>
 
-        <div class="controls">
-            <button onclick="prevImage()">⏮️</button>
-            <button onclick="togglePlay()" id="playBtn">▶️</button>
-            <button onclick="nextImage()">⏭️</button>
-            <button onclick="toggleFullscreen()">🖥️</button>
-        </div>
-    </div>
+<script>
+const images = [
+    ["rada/dong-ha-mon250726084004.MAX0749.jpg", "26/07/2025 08:40"],
+    ["rada/dong-ha-mon250726085004.MAX0750.jpg", "26/07/2025 08:50"],
+    ["rada/dong-ha-mon250726090004.MAX0751.jpg", "26/07/2025 09:00"],
+    ["rada/dong-ha-mon250726091004.MAX0752.jpg", "26/07/2025 09:10"],
+    ["rada/dong-ha-mon250726092004.MAX0753.jpg", "26/07/2025 09:20"],
+];
+let current = 0;
+let playing = true;
+let interval = setInterval(nextImage, 1000);
 
-    <script>
-        const imageList = ['rada/dong-ha-mon250726083005.MAX0748.jpg', 'rada/dong-ha-mon250726084004.MAX0749.jpg', 'rada/dong-ha-mon250726085004.MAX0750.jpg', 'rada/dong-ha-mon250726090004.MAX0751.jpg', 'rada/dong-ha-mon250726091004.MAX0752.jpg'];
-        const imageTimes = ['08:30 26/07/2025', '08:40 26/07/2025', '08:50 26/07/2025', '09:00 26/07/2025', '09:10 26/07/2025'];
-        let currentIndex = imageList.length - 1;
-        let playing = false;
-        let interval;
+function updateImage() {
+    document.getElementById("radar").src = images[current][0];
+    document.getElementById("timestamp").innerText = images[current][1];
+}
 
-        const imgElement = document.getElementById("radarImage");
-        const timeElement = document.getElementById("time-display");
-        const playBtn = document.getElementById("playBtn");
+function nextImage() {
+    current = (current + 1) % images.length;
+    updateImage();
+}
 
-        function updateImage() {
-            imgElement.src = imageList[currentIndex];
-            timeElement.textContent = imageTimes[currentIndex];
-        }
+function prevImage() {
+    current = (current - 1 + images.length) % images.length;
+    updateImage();
+}
 
-        function prevImage() {
-            currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
-            updateImage();
-        }
+function togglePlay() {
+    playing = !playing;
+    if (playing) {
+        interval = setInterval(nextImage, 1000);
+    } else {
+        clearInterval(interval);
+    }
+}
 
-        function nextImage() {
-            currentIndex = (currentIndex + 1) % imageList.length;
-            updateImage();
-        }
+function openFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    }
+}
+updateImage();
+</script>
 
-        function togglePlay() {
-            playing = !playing;
-            playBtn.textContent = playing ? "⏸️" : "▶️";
-            if (playing) {
-                interval = setInterval(nextImage, 800);
-            } else {
-                clearInterval(interval);
-            }
-        }
-
-        function toggleFullscreen() {
-            const docEl = document.documentElement;
-            if (!document.fullscreenElement) {
-                docEl.requestFullscreen().catch(err => {
-                    alert("Không thể vào full màn hình: " + err.message);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        updateImage();
-    </script>
 </body>
 </html>

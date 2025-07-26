@@ -7,11 +7,11 @@ import subprocess
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
-MAX_IMAGES = 5
+NUM_IMAGES = 5
 
 def extract_datetime(filename):
+    name = os.path.basename(filename)
     try:
-        name = os.path.basename(filename)
         y = int(name[11:13]) + 2000
         m = int(name[13:15])
         d = int(name[15:17])
@@ -21,175 +21,167 @@ def extract_datetime(filename):
     except:
         return None
 
-def get_latest_images():
-    files = glob.glob(os.path.join(SOURCE_DIR, "*.jpg"))
-    files.sort(key=lambda x: extract_datetime(x) or datetime.datetime.min)
-    return files[-MAX_IMAGES:]
+# Tạo thư mục rada nếu chưa có
+os.makedirs(TARGET_DIR, exist_ok=True)
 
-def copy_images_to_target(files):
-    if not os.path.exists(TARGET_DIR):
-        os.makedirs(TARGET_DIR)
-    for file in files:
-        shutil.copy(file, os.path.join(TARGET_DIR, os.path.basename(file)))
+# Lấy các file radar ảnh .jpg
+all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
+selected_images = all_images[:NUM_IMAGES]
 
-def delete_old_images():
-    now = datetime.datetime.now()
-    for file in glob.glob(os.path.join(TARGET_DIR, "*.jpg")):
-        dt = extract_datetime(file)
-        if dt and (now - dt).days >= 1:
-            os.remove(file)
+# Copy ảnh vào thư mục rada
+image_infos = []
+for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
+    dst = os.path.join(TARGET_DIR, os.path.basename(src))
+    shutil.copy2(src, dst)
+    dt = extract_datetime(src)
+    if dt:
+        image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
 
-def generate_html(image_paths):
-    image_files = [os.path.basename(path) for path in image_paths]
-    times = []
-    for name in image_files:
-        dt = extract_datetime(name)
-        times.append(dt.strftime("%H:%M %d/%m/%Y") if dt else "Không rõ")
+# Xóa ảnh cũ trong rada/
+existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
+keep_files = [os.path.join(TARGET_DIR, os.path.basename(f)) for f, _ in image_infos]
+for f in existing_files:
+    if f not in keep_files:
+        os.remove(f)
 
-    image_list_js = str([f"rada/{img}" for img in image_files])
-    time_list_js = str(times)
-
-    with open(HTML_FILE, "w", encoding="utf-8") as f:
-        f.write(f"""<!DOCTYPE html>
+# Tạo file index.html
+html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Radar Thời Tiết</title>
-    <meta http-equiv="refresh" content="300">
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }}
-        .wrapper {{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }}
-        #time-display {{
-            font-size: 16px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 8px 14px;
-            border-radius: 10px;
-            margin-right: 12px;
-            text-align: center;
-            white-space: nowrap;
-        }}
-        #radarImage {{
-            width: 90vw;
-            max-width: 800px;
-            height: auto;
-        }}
-        .controls {{
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px;
-            border-radius: 10px;
-            margin-left: 12px;
-        }}
-        button {{
-            font-size: 14px;
-            padding: 10px 14px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-            background: #444;
-            color: #fff;
-        }}
-        button:hover {{
-            background: #666;
-        }}
-    </style>
+<meta charset="UTF-8">
+<title>Radar Thời Tiết</title>
+<meta http-equiv="refresh" content="600">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .image-container {
+        position: relative;
+        display: inline-block;
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+
+    .timestamp {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0,0,0,0.7);
+        padding: 4px 12px;
+        border-radius: 10px;
+        font-size: 18px;
+        z-index: 10;
+    }
+
+    img {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+
+    .controls {
+        margin: 10px;
+        font-size: 24px;
+    }
+
+    button {
+        font-size: 20px;
+        padding: 6px 10px;
+        margin: 0 5px;
+        border-radius: 8px;
+        border: none;
+        background-color: #333;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555;
+    }
+</style>
 </head>
 <body>
-    <h2 style="text-align:center;">Radar Thời Tiết</h2>
+<h2>🛰️ Ảnh Radar Thời Tiết</h2>
 
-    <div class="wrapper">
-        <div id="time-display">{times[-1]}</div>
+<div class="controls">
+    <button onclick="prevImage()">⏮️</button>
+    <button onclick="togglePlay()">⏯️</button>
+    <button onclick="nextImage()">⏭️</button>
+    <button onclick="openFullscreen()">🖥️</button>
+</div>
 
-        <img id="radarImage" src="rada/{image_files[-1]}" alt="Radar">
+<div class="image-container">
+    <div class="timestamp" id="timestamp"></div>
+    <img id="radar" src="" alt="Radar Image">
+</div>
 
-        <div class="controls">
-            <button onclick="prevImage()">⏮️</button>
-            <button onclick="togglePlay()" id="playBtn">▶️</button>
-            <button onclick="nextImage()">⏭️</button>
-            <button onclick="toggleFullscreen()">🖥️</button>
-        </div>
-    </div>
+<script>
+const images = [
+"""
 
-    <script>
-        const imageList = {image_list_js};
-        const imageTimes = {time_list_js};
-        let currentIndex = imageList.length - 1;
-        let playing = false;
-        let interval;
+# Thêm danh sách ảnh và thời gian tương ứng
+for filename, dt in image_infos:
+    html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
-        const imgElement = document.getElementById("radarImage");
-        const timeElement = document.getElementById("time-display");
-        const playBtn = document.getElementById("playBtn");
+html += """];
+let current = 0;
+let playing = true;
+let interval = setInterval(nextImage, 1000);
 
-        function updateImage() {{
-            imgElement.src = imageList[currentIndex];
-            timeElement.textContent = imageTimes[currentIndex];
-        }}
+function updateImage() {
+    document.getElementById("radar").src = images[current][0];
+    document.getElementById("timestamp").innerText = images[current][1];
+}
 
-        function prevImage() {{
-            currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
-            updateImage();
-        }}
+function nextImage() {
+    current = (current + 1) % images.length;
+    updateImage();
+}
 
-        function nextImage() {{
-            currentIndex = (currentIndex + 1) % imageList.length;
-            updateImage();
-        }}
+function prevImage() {
+    current = (current - 1 + images.length) % images.length;
+    updateImage();
+}
 
-        function togglePlay() {{
-            playing = !playing;
-            playBtn.textContent = playing ? "⏸️" : "▶️";
-            if (playing) {{
-                interval = setInterval(nextImage, 800);
-            }} else {{
-                clearInterval(interval);
-            }}
-        }}
+function togglePlay() {
+    playing = !playing;
+    if (playing) {
+        interval = setInterval(nextImage, 1000);
+    } else {
+        clearInterval(interval);
+    }
+}
 
-        function toggleFullscreen() {{
-            const docEl = document.documentElement;
-            if (!document.fullscreenElement) {{
-                docEl.requestFullscreen().catch(err => {{
-                    alert("Không thể vào full màn hình: " + err.message);
-                }});
-            }} else {{
-                document.exitFullscreen();
-            }}
-        }}
+function openFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    }
+}
+updateImage();
+</script>
 
-        updateImage();
-    </script>
 </body>
 </html>
-""")
+"""
 
-def git_commit_and_push():
-    try:
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
-        subprocess.run(["git", "push"], check=True)
-        print("✅ Đã cập nhật lên GitHub")
-    except subprocess.CalledProcessError as e:
-        print("❌ Lỗi Git:", e)
+# Ghi file index.html
+with open(HTML_FILE, "w", encoding="utf-8") as f:
+    f.write(html)
 
-if __name__ == "__main__":
-    print("🚀 Đang cập nhật ảnh radar...")
-    latest_images = get_latest_images()
-    copy_images_to_target(latest_images)
-    delete_old_images()
-    generate_html(latest_images)
-    git_commit_and_push()
+print("✅ Đã tạo xong index.html với ảnh radar và điều khiển.")
+
+# Gửi lên GitHub (nếu cần)
+try:
+    subprocess.run(["git", "add", "."], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+    subprocess.run(["git", "push"], check=True)
+    print("🚀 Đã đẩy lên GitHub.")
+except subprocess.CalledProcessError as e:
+    print("❌ Lỗi Git:", e)
