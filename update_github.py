@@ -83,7 +83,7 @@ html = """<!DOCTYPE html>
         align-items: center;
         max-width: 95vw;
         max-height: 95vh;
-        gap: 0px; /* 👈 bỏ khoảng cách giữa radar và thang màu */
+        gap: 2px; /* 👈 giảm khoảng cách giữa radar và thang màu */
     }
 
     .radar-wrapper {
