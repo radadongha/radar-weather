@@ -5,10 +5,11 @@ import datetime
 import subprocess
 from PIL import Image
 
+# Cấu hình
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
-LEGEND_ORIGINAL = "legend.png"
+LEGEND_ORIGINAL = "legend.png"  # Đặt cùng thư mục với script
 LEGEND_RESIZED = os.path.join(TARGET_DIR, "legend.png")
 NUM_IMAGES = 5
 
@@ -30,39 +31,45 @@ def resize_legend(image_path, output_path, scale=1/3):
         return
     img = Image.open(image_path)
     new_size = (int(img.width * scale), int(img.height * scale))
-    img_resized = img.resize(new_size, Image.ANTIALIAS)
+    img_resized = img.resize(new_size, Image.Resampling.LANCZOS)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     img_resized.save(output_path)
     print(f"🖼️ Đã resize thang màu: {output_path}")
 
-# Tạo thư mục rada nếu chưa có
-os.makedirs(TARGET_DIR, exist_ok=True)
+def main():
+    print("🚀 Đang cập nhật ảnh radar...")
 
-# Lấy các file radar ảnh .jpg
-all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
-selected_images = all_images[:NUM_IMAGES]
+    os.makedirs(TARGET_DIR, exist_ok=True)
 
-# Copy ảnh vào thư mục rada
-image_infos = []
-for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
-    dst = os.path.join(TARGET_DIR, os.path.basename(src))
-    shutil.copy2(src, dst)
-    dt = extract_datetime(src)
-    if dt:
-        image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
+    # Lấy 5 ảnh radar mới nhất
+    all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
+    selected_images = all_images[:NUM_IMAGES]
 
-# Xóa ảnh cũ trong rada/ (trừ ảnh legend.png)
-existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
-keep_files = [os.path.join(TARGET_DIR, os.path.basename(f)) for f, _ in image_infos]
-for f in existing_files:
-    if f not in keep_files:
-        os.remove(f)
+    if not selected_images:
+        print("❌ Không tìm thấy ảnh radar.")
+        return
 
-# Resize thang màu
-resize_legend(LEGEND_ORIGINAL, LEGEND_RESIZED, scale=1/3)
+    # Copy và lấy thông tin thời gian
+    image_infos = []
+    for src in reversed(selected_images):
+        dst = os.path.join(TARGET_DIR, os.path.basename(src))
+        shutil.copy2(src, dst)
+        dt = extract_datetime(src)
+        if dt:
+            image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
 
-# Tạo file index.html
-html = """<!DOCTYPE html>
+    # Xóa ảnh radar cũ không còn dùng
+    existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
+    keep_files = [os.path.join(TARGET_DIR, f) for f, _ in image_infos]
+    for f in existing_files:
+        if f not in keep_files:
+            os.remove(f)
+
+    # Resize ảnh thang màu
+    resize_legend(LEGEND_ORIGINAL, LEGEND_RESIZED, scale=1/3)
+
+    # Tạo file index.html
+    html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -77,14 +84,12 @@ html = """<!DOCTYPE html>
         margin: 0;
         padding: 0;
     }
-
     .image-container {
         position: relative;
         display: inline-block;
         max-width: 95vw;
         max-height: 95vh;
     }
-
     .timestamp {
         position: absolute;
         top: 10px;
@@ -96,17 +101,14 @@ html = """<!DOCTYPE html>
         font-size: 18px;
         z-index: 10;
     }
-
     img {
         max-width: 90vw;
         max-height: 90vh;
     }
-
     .controls {
         margin: 10px;
         font-size: 24px;
     }
-
     button {
         font-size: 20px;
         padding: 6px 10px;
@@ -117,11 +119,9 @@ html = """<!DOCTYPE html>
         color: white;
         cursor: pointer;
     }
-
     button:hover {
         background-color: #555;
     }
-
     .legend {
         margin-top: 10px;
     }
@@ -143,18 +143,17 @@ html = """<!DOCTYPE html>
 </div>
 
 <div class="legend">
-    <img src="rada/legend.png" alt="Thang màu phản hồi" style="margin-top:10px;">
+    <img src="rada/legend.png" alt="Thang màu phản hồi">
 </div>
 
 <script>
 const images = [
 """
 
-# Thêm danh sách ảnh và thời gian tương ứng
-for filename, dt in image_infos:
-    html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
+    for filename, dt in image_infos:
+        html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
-html += """];
+    html += """];
 let current = 0;
 let playing = true;
 let interval = setInterval(nextImage, 1000);
@@ -196,17 +195,23 @@ updateImage();
 </html>
 """
 
-# Ghi file index.html
-with open(HTML_FILE, "w", encoding="utf-8") as f:
-    f.write(html)
+    with open(HTML_FILE, "w", encoding="utf-8") as f:
+        f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
+    print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
 
-# Gửi lên GitHub (nếu cần)
-try:
-    subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
-    subprocess.run(["git", "push"], check=True)
-    print("🚀 Đã đẩy lên GitHub.")
-except subprocess.CalledProcessError as e:
-    print("❌ Lỗi Git:", e)
+    # Tự động đẩy lên GitHub nếu có thay đổi
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"])
+        if result.returncode != 0:
+            subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+            subprocess.run(["git", "push"], check=True)
+            print("🚀 Đã đẩy lên GitHub.")
+        else:
+            print("ℹ️ Không có thay đổi mới để commit.")
+    except subprocess.CalledProcessError as e:
+        print("❌ Lỗi Git:", e)
+
+if __name__ == "__main__":
+    main()
