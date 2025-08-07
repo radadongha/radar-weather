@@ -1,38 +1,126 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ảnh radar thời tiết</title>
-  <style>
-    body { background: #000; margin: 0; padding: 0; text-align: center; color: white; }
-    .container { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
-    .radar-img { margin: 5px; border: 1px solid #444; }
-    .legend-container {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 5px;
-      border-radius: 5px;
-      border: 2px solid #fff;
+<meta charset="UTF-8">
+<title>Radar Thời Tiết</title>
+<meta http-equiv="refresh" content="600">
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 0;
     }
-    button { font-size: 16px; padding: 8px 12px; margin: 10px; }
-  </style>
+
+    .image-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 95vw;
+        max-height: 95vh;
+        gap: 10px;
+    }
+
+    .timestamp {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0,0,0,0.7);
+        padding: 4px 12px;
+        border-radius: 10px;
+        font-size: 18px;
+        z-index: 10;
+    }
+
+    img {
+        max-height: 90vh;
+    }
+
+    .controls {
+        margin: 10px;
+        font-size: 24px;
+    }
+
+    button {
+        font-size: 20px;
+        padding: 6px 10px;
+        margin: 0 5px;
+        border-radius: 8px;
+        border: none;
+        background-color: #333;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555;
+    }
+</style>
 </head>
 <body>
-  <h2>🛰️ Ảnh Radar Thời Tiết Mới Nhất</h2>
-  <div class="container">
-    <img class="radar-img" src="rada\dong-ha-mon250807111004.MAX2491.jpg" width="640" height="480" />
-    <img class="radar-img" src="rada\dong-ha-mon250807110005.MAX2490.jpg" width="640" height="480" />
-    <img class="radar-img" src="rada\dong-ha-mon250807105004.MAX2489.jpg" width="640" height="480" />
-    <img class="radar-img" src="rada\dong-ha-mon250807104005.MAX2488.jpg" width="640" height="480" />
-    <img class="radar-img" src="rada\dong-ha-mon250807103004.MAX2487.jpg" width="640" height="480" />
-  </div>
-  <div class="legend-container">
-    <img src="rada\legend_resized.png" />
-  </div>
+<h2>🛰️ Ảnh Radar Thời Tiết</h2>
 
-  <button onclick="document.documentElement.requestFullscreen()">🖥️ Full màn hình</button>
+<div class="controls">
+    <button onclick="prevImage()">⏮️</button>
+    <button onclick="togglePlay()">⏯️</button>
+    <button onclick="nextImage()">⏭️</button>
+    <button onclick="openFullscreen()">🖥️</button>
+</div>
+
+<div class="image-container">
+    <div class="timestamp" id="timestamp"></div>
+    <img id="radar" src="" alt="Radar Image">
+    <img id="legend" src="rada/legend.png" alt="Legend">
+</div>
+
+<script>
+const images = [
+    ["rada/dong-ha-mon250807104005.MAX2488.jpg", "07/08/2025 10:40"],
+    ["rada/dong-ha-mon250807105004.MAX2489.jpg", "07/08/2025 10:50"],
+    ["rada/dong-ha-mon250807110005.MAX2490.jpg", "07/08/2025 11:00"],
+    ["rada/dong-ha-mon250807111004.MAX2491.jpg", "07/08/2025 11:10"],
+    ["rada/dong-ha-mon250807112004.MAX2492.jpg", "07/08/2025 11:20"],
+];
+let current = 0;
+let playing = true;
+let interval = setInterval(nextImage, 1000);
+
+function updateImage() {
+    document.getElementById("radar").src = images[current][0];
+    document.getElementById("timestamp").innerText = images[current][1];
+}
+
+function nextImage() {
+    current = (current + 1) % images.length;
+    updateImage();
+}
+
+function prevImage() {
+    current = (current - 1 + images.length) % images.length;
+    updateImage();
+}
+
+function togglePlay() {
+    playing = !playing;
+    if (playing) {
+        interval = setInterval(nextImage, 1000);
+    } else {
+        clearInterval(interval);
+    }
+}
+
+function openFullscreen() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    }
+}
+updateImage();
+</script>
+
 </body>
 </html>
