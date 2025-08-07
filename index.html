@@ -15,13 +15,24 @@
     }
 
     .image-container {
-        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
         max-width: 95vw;
         max-height: 95vh;
         gap: 10px;
+    }
+
+    .radar-wrapper {
+        position: relative;
+    }
+
+    #radar {
+        max-height: 90vh;
+    }
+
+    #legend {
+        max-height: 90vh;
     }
 
     .timestamp {
@@ -34,10 +45,6 @@
         border-radius: 10px;
         font-size: 18px;
         z-index: 10;
-    }
-
-    img {
-        max-height: 90vh;
     }
 
     .controls {
@@ -72,8 +79,10 @@
 </div>
 
 <div class="image-container">
-    <div class="timestamp" id="timestamp"></div>
-    <img id="radar" src="" alt="Radar Image">
+    <div class="radar-wrapper">
+        <div class="timestamp" id="timestamp"></div>
+        <img id="radar" src="" alt="Radar Image">
+    </div>
     <img id="legend" src="rada/legend.png" alt="Legend">
 </div>
 

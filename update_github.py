@@ -78,13 +78,24 @@ html = """<!DOCTYPE html>
     }
 
     .image-container {
-        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
         max-width: 95vw;
         max-height: 95vh;
         gap: 10px;
+    }
+
+    .radar-wrapper {
+        position: relative;
+    }
+
+    #radar {
+        max-height: 90vh;
+    }
+
+    #legend {
+        max-height: 90vh;
     }
 
     .timestamp {
@@ -97,10 +108,6 @@ html = """<!DOCTYPE html>
         border-radius: 10px;
         font-size: 18px;
         z-index: 10;
-    }
-
-    img {
-        max-height: 90vh;
     }
 
     .controls {
@@ -135,8 +142,10 @@ html = """<!DOCTYPE html>
 </div>
 
 <div class="image-container">
-    <div class="timestamp" id="timestamp"></div>
-    <img id="radar" src="" alt="Radar Image">
+    <div class="radar-wrapper">
+        <div class="timestamp" id="timestamp"></div>
+        <img id="radar" src="" alt="Radar Image">
+    </div>
     <img id="legend" src="rada/legend.png" alt="Legend">
 </div>
 
@@ -194,7 +203,7 @@ updateImage();
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
+print("✅ Đã tạo xong index.html với ảnh radar + timestamp + legend + điều khiển.")
 
 # Gửi lên GitHub (nếu cần)
 try:
