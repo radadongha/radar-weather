@@ -3,10 +3,12 @@ import shutil
 import glob
 import datetime
 import subprocess
+from PIL import Image
 
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
+COLORBAR_PATH = "colorbar.png"
 NUM_IMAGES = 5
 
 def extract_datetime(filename):
@@ -21,28 +23,50 @@ def extract_datetime(filename):
     except:
         return None
 
+def append_colorbar(radar_path, colorbar_img, output_path):
+    radar_img = Image.open(radar_path).convert("RGBA")
+    radar_width, radar_height = radar_img.size
+
+    # Resize colorbar để khớp chiều cao
+    cb_width, cb_height = colorbar_img.size
+    new_cb_width = int(cb_width * radar_height / cb_height)
+    resized_cb = colorbar_img.resize((new_cb_width, radar_height), Image.Resampling.LANCZOS)
+
+    # Ghép ảnh
+    combined = Image.new("RGBA", (radar_width + new_cb_width, radar_height), (0, 0, 0, 0))
+    combined.paste(radar_img, (0, 0))
+    combined.paste(resized_cb, (radar_width, 0), resized_cb)
+    combined.save(output_path)
+
 # Tạo thư mục rada nếu chưa có
 os.makedirs(TARGET_DIR, exist_ok=True)
+
+# Kiểm tra thang màu
+if not os.path.exists(COLORBAR_PATH):
+    print(f"❌ Không tìm thấy ảnh thang màu: {COLORBAR_PATH}")
+    exit(1)
+
+colorbar_img = Image.open(COLORBAR_PATH).convert("RGBA")
 
 # Lấy các file radar ảnh .jpg
 all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
 selected_images = all_images[:NUM_IMAGES]
 
-# Copy ảnh vào thư mục rada
+# Xóa ảnh cũ trong rada/
+for f in glob.glob(os.path.join(TARGET_DIR, "*.png")):
+    os.remove(f)
+
+# Copy ảnh vào thư mục rada, xử lý ghép thang màu
 image_infos = []
-for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
-    dst = os.path.join(TARGET_DIR, os.path.basename(src))
-    shutil.copy2(src, dst)
+for src in reversed(selected_images):  # đảo lại thứ tự cũ -> mới
+    base_name = os.path.splitext(os.path.basename(src))[0]
+    dst_png = os.path.join(TARGET_DIR, base_name + ".png")
+
+    # Ghép thang màu và lưu
+    append_colorbar(src, colorbar_img, dst_png)
     dt = extract_datetime(src)
     if dt:
-        image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
-
-# Xóa ảnh cũ trong rada/
-existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
-keep_files = [os.path.join(TARGET_DIR, os.path.basename(f)) for f, _ in image_infos]
-for f in existing_files:
-    if f not in keep_files:
-        os.remove(f)
+        image_infos.append((os.path.basename(dst_png), dt.strftime("%d/%m/%Y %H:%M")))
 
 # Tạo file index.html
 html = """<!DOCTYPE html>
@@ -125,7 +149,6 @@ html = """<!DOCTYPE html>
 const images = [
 """
 
-# Thêm danh sách ảnh và thời gian tương ứng
 for filename, dt in image_infos:
     html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
@@ -171,16 +194,16 @@ updateImage();
 </html>
 """
 
-# Ghi file index.html
+# Ghi file HTML
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và điều khiển.")
+print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
 
-# Gửi lên GitHub (nếu cần)
+# Gửi lên GitHub nếu có
 try:
     subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar + thang màu"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("🚀 Đã đẩy lên GitHub.")
 except subprocess.CalledProcessError as e:
