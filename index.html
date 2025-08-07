@@ -8,7 +8,15 @@
     body { background: #000; margin: 0; padding: 0; text-align: center; color: white; }
     .container { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
     .radar-img { margin: 5px; border: 1px solid #444; }
-    .legend { position: fixed; top: 10px; right: 10px; z-index: 10; border: 2px solid #fff; background: rgba(0,0,0,0.3); }
+    .legend-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px;
+      border-radius: 5px;
+      border: 2px solid #fff;
+    }
     button { font-size: 16px; padding: 8px 12px; margin: 10px; }
   </style>
 </head>
@@ -21,7 +29,9 @@
     <img class="radar-img" src="rada\dong-ha-mon250807104005.MAX2488.jpg" width="640" height="480" />
     <img class="radar-img" src="rada\dong-ha-mon250807103004.MAX2487.jpg" width="640" height="480" />
   </div>
-  <img class="legend" src="rada\legend_resized.png" />
+  <div class="legend-container">
+    <img src="rada\legend_resized.png" />
+  </div>
 
   <button onclick="document.documentElement.requestFullscreen()">🖥️ Full màn hình</button>
 </body>

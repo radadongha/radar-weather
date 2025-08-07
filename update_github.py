@@ -40,7 +40,7 @@ def resize_legend(input_path, output_path, scale=1/3):
     print(f"🖼️ Đã tạo thang màu thu nhỏ: {output_path}")
 
 def generate_index_html(image_files, legend_file):
-    """Tạo file index.html để hiển thị ảnh radar và thang màu"""
+    """Tạo file index.html để hiển thị ảnh radar và thang màu ở bên phải"""
     html = """
 <!DOCTYPE html>
 <html lang="vi">
@@ -51,7 +51,15 @@ def generate_index_html(image_files, legend_file):
     body { background: #000; margin: 0; padding: 0; text-align: center; color: white; }
     .container { display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
     .radar-img { margin: 5px; border: 1px solid #444; }
-    .legend { position: fixed; top: 10px; right: 10px; z-index: 10; border: 2px solid #fff; background: rgba(0,0,0,0.3); }
+    .legend-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px;
+      border-radius: 5px;
+      border: 2px solid #fff;
+    }
     button { font-size: 16px; padding: 8px 12px; margin: 10px; }
   </style>
 </head>
@@ -61,10 +69,11 @@ def generate_index_html(image_files, legend_file):
 """
     for img in image_files:
         html += f'    <img class="radar-img" src="{img}" width="640" height="480" />\n'
+
+    html += "  </div>\n"
     if os.path.exists(legend_file):
-        html += f'  </div>\n  <img class="legend" src="{legend_file}" />\n'
-    else:
-        html += f'  </div>\n  <!-- Không có thang màu -->\n'
+        html += f'  <div class="legend-container">\n    <img src="{legend_file}" />\n  </div>\n'
+
     html += """
   <button onclick="document.documentElement.requestFullscreen()">🖥️ Full màn hình</button>
 </body>
@@ -72,7 +81,8 @@ def generate_index_html(image_files, legend_file):
 """
     with open(INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(html)
-    print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
+    print("✅ Đã tạo xong index.html với ảnh radar và thang màu bên phải.")
+
 
 def git_commit_and_push():
     """Tự động commit và push ảnh mới"""
