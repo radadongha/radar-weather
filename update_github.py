@@ -5,7 +5,6 @@ import datetime
 import subprocess
 from PIL import Image
 
-# Cấu hình
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
@@ -25,7 +24,7 @@ def extract_datetime(filename):
     except:
         return None
 
-def resize_legend(input_path, output_path, scale=1.0):
+def resize_legend(input_path, output_path, scale=0.66):
     try:
         img = Image.open(input_path)
         new_size = (int(img.width * scale), int(img.height * scale))
@@ -39,7 +38,7 @@ def resize_legend(input_path, output_path, scale=1.0):
 os.makedirs(TARGET_DIR, exist_ok=True)
 
 # Resize thang màu
-resize_legend(LEGEND_ORIGINAL, LEGEND_OUTPUT, scale=1.0)
+resize_legend(LEGEND_ORIGINAL, LEGEND_OUTPUT)
 
 # Lấy các file radar ảnh .jpg
 all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
@@ -47,7 +46,7 @@ selected_images = all_images[:NUM_IMAGES]
 
 # Copy ảnh vào thư mục rada
 image_infos = []
-for src in reversed(selected_images):  # đảo lại theo thứ tự thời gian
+for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
     dst = os.path.join(TARGET_DIR, os.path.basename(src))
     shutil.copy2(src, dst)
     dt = extract_datetime(src)
@@ -77,24 +76,28 @@ html = """<!DOCTYPE html>
         margin: 0;
         padding: 0;
     }
+
     .image-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 0; /* sát vào radar */
-        max-width: 100vw;
-        max-height: 90vh;
-        overflow: hidden;
+        max-width: 95vw;
+        max-height: 95vh;
+        gap: 0px;
     }
+
     .radar-wrapper {
         position: relative;
     }
+
     #radar {
         max-height: 90vh;
     }
+
     #legend {
         max-height: 90vh;
     }
+
     .timestamp {
         position: absolute;
         top: 10px;
@@ -106,10 +109,12 @@ html = """<!DOCTYPE html>
         font-size: 18px;
         z-index: 10;
     }
+
     .controls {
         margin: 10px;
         font-size: 24px;
     }
+
     button {
         font-size: 20px;
         padding: 6px 10px;
@@ -120,6 +125,7 @@ html = """<!DOCTYPE html>
         color: white;
         cursor: pointer;
     }
+
     button:hover {
         background-color: #555;
     }
@@ -147,12 +153,11 @@ html = """<!DOCTYPE html>
 const images = [
 """
 
-# Thêm danh sách ảnh radar vào HTML
+# Thêm danh sách ảnh và thời gian tương ứng
 for filename, dt in image_infos:
     html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
 html += """];
-
 let current = 0;
 let playing = true;
 let interval = setInterval(nextImage, 1000);
