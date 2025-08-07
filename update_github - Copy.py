@@ -24,7 +24,7 @@ def extract_datetime(filename):
     except:
         return None
 
-def resize_legend(input_path, output_path, scale=0.5):
+def resize_legend(input_path, output_path, scale=0.7):
     try:
         img = Image.open(input_path)
         new_size = (int(img.width * scale), int(img.height * scale))
@@ -83,7 +83,7 @@ html = """<!DOCTYPE html>
         align-items: center;
         max-width: 95vw;
         max-height: 95vh;
-        gap: 10px;
+        gap: 2px;
     }
 
     .radar-wrapper {
