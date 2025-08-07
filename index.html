@@ -57,6 +57,10 @@
     button:hover {
         background-color: #555;
     }
+
+    .legend {
+        margin-top: 10px;
+    }
 </style>
 </head>
 <body>
@@ -74,13 +78,17 @@
     <img id="radar" src="" alt="Radar Image">
 </div>
 
+<div class="legend">
+    <img src="rada/legend.png" alt="Thang màu phản hồi" style="margin-top:10px;">
+</div>
+
 <script>
 const images = [
-    ["rada/dong-ha-mon250807092005.MAX2480.png", "07/08/2025 09:20"],
-    ["rada/dong-ha-mon250807093005.MAX2481.png", "07/08/2025 09:30"],
-    ["rada/dong-ha-mon250807094005.MAX2482.png", "07/08/2025 09:40"],
-    ["rada/dong-ha-mon250807095004.MAX2483.png", "07/08/2025 09:50"],
-    ["rada/dong-ha-mon250807100005.MAX2484.png", "07/08/2025 10:00"],
+    ["rada/dong-ha-mon250807102004.MAX2486.jpg", "07/08/2025 10:20"],
+    ["rada/dong-ha-mon250807103004.MAX2487.jpg", "07/08/2025 10:30"],
+    ["rada/dong-ha-mon250807104005.MAX2488.jpg", "07/08/2025 10:40"],
+    ["rada/dong-ha-mon250807105004.MAX2489.jpg", "07/08/2025 10:50"],
+    ["rada/dong-ha-mon250807110005.MAX2490.jpg", "07/08/2025 11:00"],
 ];
 let current = 0;
 let playing = true;
