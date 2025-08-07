@@ -3,10 +3,13 @@ import shutil
 import glob
 import datetime
 import subprocess
+from PIL import Image
 
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
+LEGEND_ORIGINAL = "legend_original.png"
+LEGEND_OUTPUT = os.path.join(TARGET_DIR, "legend.png")
 NUM_IMAGES = 5
 
 def extract_datetime(filename):
@@ -21,8 +24,21 @@ def extract_datetime(filename):
     except:
         return None
 
+def resize_legend(input_path, output_path, scale=0.5):
+    try:
+        img = Image.open(input_path)
+        new_size = (int(img.width * scale), int(img.height * scale))
+        img = img.resize(new_size, Image.LANCZOS)
+        img.save(output_path)
+        print("✅ Đã resize ảnh legend.")
+    except Exception as e:
+        print("❌ Lỗi resize legend:", e)
+
 # Tạo thư mục rada nếu chưa có
 os.makedirs(TARGET_DIR, exist_ok=True)
+
+# Resize thang màu
+resize_legend(LEGEND_ORIGINAL, LEGEND_OUTPUT)
 
 # Lấy các file radar ảnh .jpg
 all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
@@ -62,10 +78,24 @@ html = """<!DOCTYPE html>
     }
 
     .image-container {
-        position: relative;
-        display: inline-block;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         max-width: 95vw;
         max-height: 95vh;
+        gap: 10px;
+    }
+
+    .radar-wrapper {
+        position: relative;
+    }
+
+    #radar {
+        max-height: 90vh;
+    }
+
+    #legend {
+        max-height: 90vh;
     }
 
     .timestamp {
@@ -78,11 +108,6 @@ html = """<!DOCTYPE html>
         border-radius: 10px;
         font-size: 18px;
         z-index: 10;
-    }
-
-    img {
-        max-width: 90vw;
-        max-height: 90vh;
     }
 
     .controls {
@@ -117,8 +142,11 @@ html = """<!DOCTYPE html>
 </div>
 
 <div class="image-container">
-    <div class="timestamp" id="timestamp"></div>
-    <img id="radar" src="" alt="Radar Image">
+    <div class="radar-wrapper">
+        <div class="timestamp" id="timestamp"></div>
+        <img id="radar" src="" alt="Radar Image">
+    </div>
+    <img id="legend" src="rada/legend.png" alt="Legend">
 </div>
 
 <script>
@@ -175,12 +203,12 @@ updateImage();
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và điều khiển.")
+print("✅ Đã tạo xong index.html với ảnh radar + timestamp + legend + điều khiển.")
 
 # Gửi lên GitHub (nếu cần)
 try:
     subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar + thang màu"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("🚀 Đã đẩy lên GitHub.")
 except subprocess.CalledProcessError as e:

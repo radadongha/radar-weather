@@ -24,15 +24,30 @@ def extract_datetime(filename):
     except:
         return None
 
-def resize_legend(input_path, output_path, scale=0.7):
+def resize_legend(input_path, output_path, scale=0.5):
     try:
-        img = Image.open(input_path)
+        img = Image.open(input_path).convert("RGBA")
+
+        # Tăng kích thước thang màu theo scale (ví dụ: 0.5 là tăng lên 150%)
         new_size = (int(img.width * scale), int(img.height * scale))
-        img = img.resize(new_size, Image.LANCZOS)
-        img.save(output_path)
-        print("✅ Đã resize ảnh legend.")
+        resized = img.resize(new_size, Image.LANCZOS)
+
+        # Mở ảnh trắng cùng chiều cao với ảnh radar để đặt thang màu sát bên
+        radar_sample = Image.open(glob.glob(os.path.join(SOURCE_DIR, "*.jpg"))[0])
+        radar_height = radar_sample.height
+        radar_sample.close()
+
+        # Căn giữa chiều cao thang màu theo chiều cao radar
+        top_padding = max((radar_height - resized.height) // 2, 0)
+
+        # Tạo ảnh trong suốt đúng kích thước radar (cho đúng vị trí dán trên HTML)
+        final = Image.new("RGBA", (resized.width, radar_height), (255, 255, 255, 0))
+        final.paste(resized, (0, top_padding), mask=resized)
+        final.save(output_path)
+        print("✅ Đã resize và căn thang màu legend.")
     except Exception as e:
         print("❌ Lỗi resize legend:", e)
+
 
 # Tạo thư mục rada nếu chưa có
 os.makedirs(TARGET_DIR, exist_ok=True)
