@@ -1,3 +1,3 @@
 ﻿@echo off
 cd /d "%~dp0"
-python update_gihub.py
+python update_github.py

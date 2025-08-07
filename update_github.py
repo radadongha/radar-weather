@@ -24,7 +24,7 @@ def extract_datetime(filename):
     except:
         return None
 
-def resize_legend(input_path, output_path, scale=0.33):
+def resize_legend(input_path, output_path, scale=0.5):
     try:
         img = Image.open(input_path)
         new_size = (int(img.width * scale), int(img.height * scale))
