@@ -7,8 +7,9 @@ import subprocess
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
+LEGEND_SOURCE = "legend.png"  # Ảnh thang màu bạn đặt cùng file script này
+LEGEND_TARGET = os.path.join(TARGET_DIR, "legend.png")
 NUM_IMAGES = 5
-LEGEND_IMAGE = "legend.png"  # tên ảnh thang màu trong rada/
 
 def extract_datetime(filename):
     name = os.path.basename(filename)
@@ -25,11 +26,17 @@ def extract_datetime(filename):
 # Tạo thư mục rada nếu chưa có
 os.makedirs(TARGET_DIR, exist_ok=True)
 
+# Copy ảnh legend.png vào rada/
+if os.path.exists(LEGEND_SOURCE):
+    shutil.copy2(LEGEND_SOURCE, LEGEND_TARGET)
+else:
+    print("⚠️ Không tìm thấy ảnh legend.png – sẽ không hiển thị thang màu.")
+
 # Lấy các file radar ảnh .jpg
 all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
 selected_images = all_images[:NUM_IMAGES]
 
-# Copy ảnh vào thư mục rada
+# Copy ảnh radar vào thư mục rada
 image_infos = []
 for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
     dst = os.path.join(TARGET_DIR, os.path.basename(src))
@@ -38,7 +45,7 @@ for src in reversed(selected_images):  # đảo lại cho đúng thứ tự th�
     if dt:
         image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
 
-# Xóa ảnh cũ trong rada/
+# Xóa ảnh cũ không nằm trong danh sách
 existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
 keep_files = [os.path.join(TARGET_DIR, os.path.basename(f)) for f, _ in image_infos]
 for f in existing_files:
@@ -120,14 +127,14 @@ html = f"""<!DOCTYPE html>
 <div class="image-container">
     <div class="timestamp" id="timestamp"></div>
     <img id="radar" class="radar-img" src="" alt="Radar Image">
-    <img src="{TARGET_DIR}/{LEGEND_IMAGE}" class="legend" alt="Thang màu">
+    <img src="{TARGET_DIR}/legend.png" class="legend" alt="Thang màu">
 </div>
 
 <script>
 const images = [
 """
 
-# Thêm danh sách ảnh và thời gian tương ứng
+# Thêm danh sách ảnh và thời gian
 for filename, dt in image_infos:
     html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
@@ -177,9 +184,9 @@ updateImage();
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và thang màu bên phải.")
+print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
 
-# Gửi lên GitHub (nếu cần)
+# Gửi lên GitHub nếu có
 try:
     subprocess.run(["git", "add", "."], check=True)
     subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar và thang màu"], check=True)
