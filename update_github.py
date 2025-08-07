@@ -8,6 +8,7 @@ SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
 NUM_IMAGES = 5
+LEGEND_IMAGE = "legend.png"  # tên ảnh thang màu trong rada/
 
 def extract_datetime(filename):
     name = os.path.basename(filename)
@@ -45,30 +46,30 @@ for f in existing_files:
         os.remove(f)
 
 # Tạo file index.html
-html = """<!DOCTYPE html>
+html = f"""<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>Radar Thời Tiết</title>
 <meta http-equiv="refresh" content="600">
 <style>
-    body {
+    body {{
         font-family: Arial, sans-serif;
         text-align: center;
         background-color: #000;
         color: #fff;
         margin: 0;
         padding: 0;
-    }
-
-    .image-container {
+    }}
+    .image-container {{
         position: relative;
-        display: inline-block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         max-width: 95vw;
         max-height: 95vh;
-    }
-
-    .timestamp {
+    }}
+    .timestamp {{
         position: absolute;
         top: 10px;
         left: 50%;
@@ -78,19 +79,20 @@ html = """<!DOCTYPE html>
         border-radius: 10px;
         font-size: 18px;
         z-index: 10;
-    }
-
-    img {
-        max-width: 90vw;
+    }}
+    .radar-img {{
         max-height: 90vh;
-    }
-
-    .controls {
+        max-width: 90vw;
+    }}
+    .legend {{
+        max-height: 90vh;
+        margin-left: 10px;
+    }}
+    .controls {{
         margin: 10px;
         font-size: 24px;
-    }
-
-    button {
+    }}
+    button {{
         font-size: 20px;
         padding: 6px 10px;
         margin: 0 5px;
@@ -99,11 +101,10 @@ html = """<!DOCTYPE html>
         background-color: #333;
         color: white;
         cursor: pointer;
-    }
-
-    button:hover {
+    }}
+    button:hover {{
         background-color: #555;
-    }
+    }}
 </style>
 </head>
 <body>
@@ -118,7 +119,8 @@ html = """<!DOCTYPE html>
 
 <div class="image-container">
     <div class="timestamp" id="timestamp"></div>
-    <img id="radar" src="" alt="Radar Image">
+    <img id="radar" class="radar-img" src="" alt="Radar Image">
+    <img src="{TARGET_DIR}/{LEGEND_IMAGE}" class="legend" alt="Thang màu">
 </div>
 
 <script>
@@ -175,12 +177,12 @@ updateImage();
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và điều khiển.")
+print("✅ Đã tạo xong index.html với ảnh radar và thang màu bên phải.")
 
 # Gửi lên GitHub (nếu cần)
 try:
     subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar và thang màu"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("🚀 Đã đẩy lên GitHub.")
 except subprocess.CalledProcessError as e:
