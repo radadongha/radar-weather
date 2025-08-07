@@ -13,14 +13,14 @@
         margin: 0;
         padding: 0;
     }
+
     .image-container {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: inline-block;
         max-width: 95vw;
         max-height: 95vh;
     }
+
     .timestamp {
         position: absolute;
         top: 10px;
@@ -32,18 +32,17 @@
         font-size: 18px;
         z-index: 10;
     }
-    .radar-img {
-        max-height: 90vh;
+
+    img {
         max-width: 90vw;
-    }
-    .legend {
         max-height: 90vh;
-        margin-left: 10px;
     }
+
     .controls {
         margin: 10px;
         font-size: 24px;
     }
+
     button {
         font-size: 20px;
         padding: 6px 10px;
@@ -54,6 +53,7 @@
         color: white;
         cursor: pointer;
     }
+
     button:hover {
         background-color: #555;
     }
@@ -71,17 +71,16 @@
 
 <div class="image-container">
     <div class="timestamp" id="timestamp"></div>
-    <img id="radar" class="radar-img" src="" alt="Radar Image">
-    <img src="rada/legend.png" class="legend" alt="Thang màu">
+    <img id="radar" src="" alt="Radar Image">
 </div>
 
 <script>
 const images = [
-    ["rada/dong-ha-mon250807090004.MAX2478.jpg", "07/08/2025 09:00"],
     ["rada/dong-ha-mon250807091005.MAX2479.jpg", "07/08/2025 09:10"],
     ["rada/dong-ha-mon250807092005.MAX2480.jpg", "07/08/2025 09:20"],
     ["rada/dong-ha-mon250807093005.MAX2481.jpg", "07/08/2025 09:30"],
     ["rada/dong-ha-mon250807094005.MAX2482.jpg", "07/08/2025 09:40"],
+    ["rada/dong-ha-mon250807095004.MAX2483.jpg", "07/08/2025 09:50"],
 ];
 let current = 0;
 let playing = true;

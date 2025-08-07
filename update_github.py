@@ -7,8 +7,6 @@ import subprocess
 SOURCE_DIR = "D:/WinSCP/RADA"
 TARGET_DIR = "rada"
 HTML_FILE = "index.html"
-LEGEND_SOURCE = "legend.png"  # Ảnh thang màu bạn đặt cùng file script này
-LEGEND_TARGET = os.path.join(TARGET_DIR, "legend.png")
 NUM_IMAGES = 5
 
 def extract_datetime(filename):
@@ -26,17 +24,11 @@ def extract_datetime(filename):
 # Tạo thư mục rada nếu chưa có
 os.makedirs(TARGET_DIR, exist_ok=True)
 
-# Copy ảnh legend.png vào rada/
-if os.path.exists(LEGEND_SOURCE):
-    shutil.copy2(LEGEND_SOURCE, LEGEND_TARGET)
-else:
-    print("⚠️ Không tìm thấy ảnh legend.png – sẽ không hiển thị thang màu.")
-
 # Lấy các file radar ảnh .jpg
 all_images = sorted(glob.glob(os.path.join(SOURCE_DIR, "*.jpg")), reverse=True)
 selected_images = all_images[:NUM_IMAGES]
 
-# Copy ảnh radar vào thư mục rada
+# Copy ảnh vào thư mục rada
 image_infos = []
 for src in reversed(selected_images):  # đảo lại cho đúng thứ tự thời gian
     dst = os.path.join(TARGET_DIR, os.path.basename(src))
@@ -45,7 +37,7 @@ for src in reversed(selected_images):  # đảo lại cho đúng thứ tự th�
     if dt:
         image_infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
 
-# Xóa ảnh cũ không nằm trong danh sách
+# Xóa ảnh cũ trong rada/
 existing_files = glob.glob(os.path.join(TARGET_DIR, "*.jpg"))
 keep_files = [os.path.join(TARGET_DIR, os.path.basename(f)) for f, _ in image_infos]
 for f in existing_files:
@@ -53,30 +45,30 @@ for f in existing_files:
         os.remove(f)
 
 # Tạo file index.html
-html = f"""<!DOCTYPE html>
+html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>Radar Thời Tiết</title>
 <meta http-equiv="refresh" content="600">
 <style>
-    body {{
+    body {
         font-family: Arial, sans-serif;
         text-align: center;
         background-color: #000;
         color: #fff;
         margin: 0;
         padding: 0;
-    }}
-    .image-container {{
+    }
+
+    .image-container {
         position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: inline-block;
         max-width: 95vw;
         max-height: 95vh;
-    }}
-    .timestamp {{
+    }
+
+    .timestamp {
         position: absolute;
         top: 10px;
         left: 50%;
@@ -86,20 +78,19 @@ html = f"""<!DOCTYPE html>
         border-radius: 10px;
         font-size: 18px;
         z-index: 10;
-    }}
-    .radar-img {{
-        max-height: 90vh;
+    }
+
+    img {
         max-width: 90vw;
-    }}
-    .legend {{
         max-height: 90vh;
-        margin-left: 10px;
-    }}
-    .controls {{
+    }
+
+    .controls {
         margin: 10px;
         font-size: 24px;
-    }}
-    button {{
+    }
+
+    button {
         font-size: 20px;
         padding: 6px 10px;
         margin: 0 5px;
@@ -108,10 +99,11 @@ html = f"""<!DOCTYPE html>
         background-color: #333;
         color: white;
         cursor: pointer;
-    }}
-    button:hover {{
+    }
+
+    button:hover {
         background-color: #555;
-    }}
+    }
 </style>
 </head>
 <body>
@@ -126,15 +118,14 @@ html = f"""<!DOCTYPE html>
 
 <div class="image-container">
     <div class="timestamp" id="timestamp"></div>
-    <img id="radar" class="radar-img" src="" alt="Radar Image">
-    <img src="{TARGET_DIR}/legend.png" class="legend" alt="Thang màu">
+    <img id="radar" src="" alt="Radar Image">
 </div>
 
 <script>
 const images = [
 """
 
-# Thêm danh sách ảnh và thời gian
+# Thêm danh sách ảnh và thời gian tương ứng
 for filename, dt in image_infos:
     html += f'    ["{TARGET_DIR}/{filename}", "{dt}"],\n'
 
@@ -184,12 +175,12 @@ updateImage();
 with open(HTML_FILE, "w", encoding="utf-8") as f:
     f.write(html)
 
-print("✅ Đã tạo xong index.html với ảnh radar và thang màu.")
+print("✅ Đã tạo xong index.html với ảnh radar và điều khiển.")
 
-# Gửi lên GitHub nếu có
+# Gửi lên GitHub (nếu cần)
 try:
     subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar và thang màu"], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar tự động"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("🚀 Đã đẩy lên GitHub.")
 except subprocess.CalledProcessError as e:
