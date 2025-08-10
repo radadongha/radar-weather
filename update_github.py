@@ -65,7 +65,7 @@ html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Radar Thời Tiết</title>
+<title>Radar Thời Tiết Đông Hà</title>
 <meta http-equiv="refresh" content="600">
 <style>
     body {
