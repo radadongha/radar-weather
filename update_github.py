@@ -65,7 +65,7 @@ html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Radar Thời Tiết Đông Hà</title>
+<title>Radar Thời Tiết</title>
 <meta http-equiv="refresh" content="600">
 <style>
     body {
@@ -83,7 +83,7 @@ html = """<!DOCTYPE html>
         align-items: center;
         max-width: 95vw;
         max-height: 95vh;
-        gap: 2px;
+        gap: 0px;
     }
 
     .radar-wrapper {
@@ -132,7 +132,7 @@ html = """<!DOCTYPE html>
 </style>
 </head>
 <body>
-<h2>🛰️ Ảnh Radar Thời Tiết</h2>
+<h2>🛰️ Ảnh Radar Thời Tiết Đông Hà</h2>
 
 <div class="controls">
     <button onclick="prevImage()">⏮️</button>
