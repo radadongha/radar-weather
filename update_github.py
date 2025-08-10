@@ -132,7 +132,7 @@ html = """<!DOCTYPE html>
 </style>
 </head>
 <body>
-<h2>🛰️ Ảnh Radar Thời Tiết Đông Hà</h2>
+<h2>🛰️ Ảnh Max Radar Thời Tiết Đông Hà</h2>
 
 <div class="controls">
     <button onclick="prevImage()">⏮️</button>
