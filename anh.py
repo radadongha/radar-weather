@@ -28,11 +28,11 @@ try:
     hour = time_part[:2]
     minute = time_part[2:4]
 
-    timestamp = f"{hour}h{minute} ngày {day}/{month}/{year}"
+    timestamp = f"Hình 1. {hour}h{minute} ngày {day}/{month}/{year}"
 except:
-    timestamp = "Không xác định thời gian"
+    timestamp = "Hình 1. Không xác định thời gian"
 
-# Mở ảnh (Pillow cần file có định dạng, nếu không có đuôi có thể thử "JPEG")
+# Mở ảnh
 img = Image.open(latest_file)
 
 # Tạo dải trắng phía dưới để chèn chữ
@@ -42,7 +42,7 @@ new_img.paste(img, (0, 0))
 
 # Chèn chữ
 draw = ImageDraw.Draw(new_img)
-font_size = max(20, img.width // 30)
+font_size = int(max(20, img.width // 30) * 1.3)  # Tăng 1.3 lần
 try:
     font = ImageFont.truetype("arial.ttf", font_size)
 except:
