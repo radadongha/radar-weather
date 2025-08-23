@@ -244,3 +244,25 @@ try:
     print("🚀 Đã đẩy lên GitHub.")
 except subprocess.CalledProcessError as e:
     print("❌ Lỗi Git:", e)
+import subprocess
+
+def git_push_changes():
+    try:
+        # Kiểm tra xem có thay đổi không
+        status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        if status.stdout.strip():
+            print("📂 Có thay đổi, tiến hành commit...")
+            subprocess.run(["git", "add", "."], check=True)
+            subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar + thang màu"], check=True)
+        else:
+            print("⚠️ Không có thay đổi mới để commit.")
+
+        # Luôn push, kể cả khi không có commit mới
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+        print("✅ Đã push lên GitHub thành công.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Lỗi Git: {e}")
+
+# Gọi hàm
+git_push_changes()
