@@ -205,6 +205,37 @@ with open(HTML_FILE, "w", encoding="utf-8") as f:
 
 print("✅ Đã tạo xong index.html với ảnh radar + timestamp + legend + điều khiển.")
 
+REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def run_git(cmd):
+    return subprocess.run(["git"] + cmd, cwd=REPO_DIR, text=True, capture_output=True)
+
+def safe_git_commit():
+    try:
+        subprocess.run(["git", "add", "."], cwd=REPO_DIR, check=True)
+        subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar + thang màu"], cwd=REPO_DIR, check=True)
+        subprocess.run(["git", "push", "origin", "main"], cwd=REPO_DIR, check=True)
+        print("✅ Commit & push thành công")
+    except subprocess.CalledProcessError as e:
+        err = e.stderr or e.stdout
+        if err and "cannot lock ref 'HEAD'" in err:
+            print("⚠️ HEAD bị hỏng → đang khôi phục nhánh main...")
+            run_git(["checkout", "--detach"])
+            run_git(["branch", "-D", "main"])
+            run_git(["fetch", "origin", "main"])
+            run_git(["checkout", "-b", "main", "origin/main"])
+            run_git(["branch", "--set-upstream-to=origin/main", "main"])
+            subprocess.run(["git", "add", "."], cwd=REPO_DIR, check=True)
+            subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar + thang màu"], cwd=REPO_DIR, check=True)
+            subprocess.run(["git", "push", "origin", "main"], cwd=REPO_DIR, check=True)
+            print("✅ Đã khôi phục HEAD và push thành công")
+        else:
+            print("❌ Lỗi Git khác:", e)
+
+# --- gọi cuối cùng ---
+safe_git_commit()
+
+
 # Gửi lên GitHub (nếu cần)
 try:
     subprocess.run(["git", "add", "."], check=True)
