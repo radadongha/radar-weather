@@ -248,7 +248,7 @@ import subprocess
 
 def git_push_changes():
     try:
-        # Kiểm tra xem có thay đổi không
+        # Kiểm tra thay đổi
         status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
         if status.stdout.strip():
             print("📂 Có thay đổi, tiến hành commit...")
@@ -257,7 +257,7 @@ def git_push_changes():
         else:
             print("⚠️ Không có thay đổi mới để commit.")
 
-        # Luôn push, kể cả khi không có commit mới
+        # Luôn push
         subprocess.run(["git", "push", "origin", "main"], check=True)
         print("✅ Đã push lên GitHub thành công.")
 
@@ -266,3 +266,4 @@ def git_push_changes():
 
 # Gọi hàm
 git_push_changes()
+
