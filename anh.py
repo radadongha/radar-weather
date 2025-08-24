@@ -28,9 +28,9 @@ try:
     hour = time_part[:2]
     minute = time_part[2:4]
 
-    timestamp = f"Hình 1. Ảnh Max lúc {hour}h{minute} ngày {day}/{month}/{year}"
+    timestamp = f"Hình 1: Ảnh Max lúc {hour}h{minute} ngày {day}/{month}/{year}"
 except:
-    timestamp = "Hình 1. Không xác định thời gian"
+    timestamp = "Hình 1: Không xác định thời gian"
 
 # Mở ảnh
 img = Image.open(latest_file)
