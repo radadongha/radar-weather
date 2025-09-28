@@ -42,7 +42,7 @@ new_img.paste(img, (0, 0))
 
 # Chèn chữ
 draw = ImageDraw.Draw(new_img)
-font_size = int(max(20, img.width // 30) * 1.3)  # Tăng 1.3 lần
+font_size = int(max(20, img.width // 30) * 1.0)  # Tăng 1.0 lần
 try:
     font = ImageFont.truetype("arial.ttf", font_size)
 except:
