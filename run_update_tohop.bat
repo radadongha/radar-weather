@@ -1,3 +1,3 @@
 ﻿@echo off
 cd /d "%~dp0"
-python update_composite.py
+python update_tohop.py
