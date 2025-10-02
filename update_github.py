@@ -21,17 +21,37 @@ LEGEND_ORIGINAL = "legend_original.png"
 NUM_IMAGES = 5
 
 def extract_datetime(filename):
-    """Lấy thời gian từ tên file radar"""
     name = os.path.basename(filename)
     try:
-        y = int(name[11:13]) + 2000
-        m = int(name[13:15])
-        d = int(name[15:17])
-        h = int(name[17:19])
-        mi = int(name[19:21])
-        return datetime.datetime(y, m, d, h, mi)
+        # tìm chuỗi số dài >= 10 trong tên file
+        import re
+        match = re.search(r"(\d{10,12})", name)
+        if not match:
+            return None
+        digits = match.group(1)
+
+        # nếu có 12 số → YYMMDDHHMMSS
+        if len(digits) >= 12:
+            y = int(digits[0:2]) + 2000
+            m = int(digits[2:4])
+            d = int(digits[4:6])
+            h = int(digits[6:8])
+            mi = int(digits[8:10])
+            # giây có thể có hoặc không
+            return datetime.datetime(y, m, d, h, mi)
+        # nếu chỉ có 10 số → YYMMDDHHMM
+        elif len(digits) == 10:
+            y = int(digits[0:2]) + 2000
+            m = int(digits[2:4])
+            d = int(digits[4:6])
+            h = int(digits[6:8])
+            mi = int(digits[8:10])
+            return datetime.datetime(y, m, d, h, mi)
+        else:
+            return None
     except:
         return None
+
 
 def resize_legend(input_path, output_path, scale=0.7):
     """Resize thang màu"""
