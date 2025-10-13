@@ -36,7 +36,7 @@ except:
 img = Image.open(latest_file)
 
 # Tạo dải trắng phía dưới để chèn chữ
-text_height = 50
+text_height = 60
 new_img = Image.new("RGB", (img.width, img.height + text_height), "white")
 new_img.paste(img, (0, 0))
 
