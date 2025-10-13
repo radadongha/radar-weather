@@ -114,7 +114,7 @@ button:hover {background:#555;}
 </style>
 </head>
 <body>
-<h2 style="text-align:center;">🛰️ So sánh Radar Đông Hà & Tam Kỳ</h2>
+<h2 style="text-align:center;">🛰️ Ảnh Radar Đông Hà & Tam Kỳ</h2>
 <div class="container">
 """
 
