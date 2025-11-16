@@ -1,0 +1,21 @@
+2025-11-05 09:42:05,086 INFO: === Script started ===
+2025-11-05 09:42:05,184 INFO: Latest image: D:\WinSCP\RADA\dong-ha-mon251105023004.MAX0414.jpg
+2025-11-05 09:42:05,185 INFO: ====== WebDriver manager ======
+2025-11-05 09:42:09,509 INFO: Get LATEST chromedriver version for google-chrome
+2025-11-05 09:42:09,629 INFO: Get LATEST chromedriver version for google-chrome
+2025-11-05 09:42:09,711 INFO: There is no [win64] chromedriver "141.0.7390.122" for browser google-chrome "141.0.7390" in cache
+2025-11-05 09:42:09,711 INFO: Get LATEST chromedriver version for google-chrome
+2025-11-05 09:42:09,950 INFO: WebDriver version 141.0.7390.122 selected
+2025-11-05 09:42:09,955 INFO: Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/141.0.7390.122/win32/chromedriver-win32.zip
+2025-11-05 09:42:09,955 INFO: About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/141.0.7390.122/win32/chromedriver-win32.zip
+2025-11-05 09:42:10,147 INFO: Driver downloading response is 200
+2025-11-05 09:42:11,277 INFO: Get LATEST chromedriver version for google-chrome
+2025-11-05 09:42:12,590 INFO: Driver has been saved in cache [C:\Users\kttv\.wdm\drivers\chromedriver\win64\141.0.7390.122]
+2025-11-05 09:42:12,599 ERROR: Unexpected error: WebDriver.__init__() got multiple values for argument 'options'
+Traceback (most recent call last):
+  File "C:\Users\kttv\Desktop\radar-weather\send_zalo.py", line 159, in main
+    driver = start_chrome_with_profile(CHROME_USER_DATA_DIR, CHROME_PROFILE)
+  File "C:\Users\kttv\Desktop\radar-weather\send_zalo.py", line 67, in start_chrome_with_profile
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+TypeError: WebDriver.__init__() got multiple values for argument 'options'
+2025-11-05 09:42:12,600 INFO: === Script finished ===
