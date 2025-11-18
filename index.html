@@ -2,134 +2,141 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Radar Thời Tiết</title>
+<title>Radar Thời Tiết Đông Hà & Tam Kỳ</title>
 <meta http-equiv="refresh" content="600">
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        background-color: #000;
-        color: #fff;
-        margin: 0;
-        padding: 0;
-    }
-
-    .image-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        max-width: 95vw;
-        max-height: 95vh;
-        gap: 2px;
-    }
-
-    .radar-wrapper {
-        position: relative;
-    }
-
-    #radar {
-        max-height: 90vh;
-    }
-
-    #legend {
-        max-height: 90vh;
-    }
-
-    .timestamp {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0,0,0,0.7);
-        padding: 4px 12px;
-        border-radius: 10px;
-        font-size: 18px;
-        z-index: 10;
-    }
-
-    .controls {
-        margin: 10px;
-        font-size: 24px;
-    }
-
-    button {
-        font-size: 20px;
-        padding: 6px 10px;
-        margin: 0 5px;
-        border-radius: 8px;
-        border: none;
-        background-color: #333;
-        color: white;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background-color: #555;
-    }
+body {font-family: Arial; background:#000; color:#fff; margin:0;}
+.container {display:flex; justify-content:space-around; align-items:flex-start; gap:20px; padding:10px;}
+.radar-block {flex:1; text-align:center;}
+.image-container {display:flex; justify-content:center; align-items:center; max-width:95%; gap:5px;}
+.radar-wrapper {position:relative;}
+.timestamp {position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:4px 12px; border-radius:10px; font-size:16px;}
+#legend {max-height:90vh;}
+.controls {margin:10px; font-size:20px;}
+button {font-size:18px; padding:4px 8px; margin:0 3px; border-radius:6px; border:none; background:#333; color:#fff; cursor:pointer;}
+button:hover {background:#555;}
 </style>
 </head>
 <body>
-<h2>🛰️ Ảnh Max Radar Thời Tiết Đông Hà</h2>
-
-<div class="controls">
-    <button onclick="prevImage()">⏮️</button>
-    <button onclick="togglePlay()">⏯️</button>
-    <button onclick="nextImage()">⏭️</button>
-    <button onclick="openFullscreen()">🖥️</button>
-</div>
-
-<div class="image-container">
-    <div class="radar-wrapper">
-        <div class="timestamp" id="timestamp"></div>
-        <img id="radar" src="" alt="Radar Image">
+<h2 style="text-align:center;">🛰️ Ảnh Radar Đông Hà & Tam Kỳ</h2>
+<div class="container">
+<div class="radar-block">
+    <h3>Đông Hà</h3>
+    <div class="controls">
+        <button onclick="prevImage('rada_dongha')">⏮️</button>
+        <button onclick="togglePlay('rada_dongha')">⏯️</button>
+        <button onclick="nextImage('rada_dongha')">⏭️</button>
+        <button onclick="openFullscreen()">🖥️</button>
     </div>
-    <img id="legend" src="rada/legend.png" alt="Legend">
+    <div class="image-container">
+        <div class="radar-wrapper">
+            <div class="timestamp" id="timestamp_rada_dongha"></div>
+            <img id="radar_rada_dongha" src="" alt="Radar Image" style="max-height:70vh;">
+        </div>
+        <img id="legend" src="rada_dongha/legend.png" alt="Legend" style="max-height:70vh;">
+    </div>
 </div>
-
+<div class="radar-block">
+    <h3>Tam Kỳ</h3>
+    <div class="controls">
+        <button onclick="prevImage('rada_tamky')">⏮️</button>
+        <button onclick="togglePlay('rada_tamky')">⏯️</button>
+        <button onclick="nextImage('rada_tamky')">⏭️</button>
+        <button onclick="openFullscreen()">🖥️</button>
+    </div>
+    <div class="image-container">
+        <div class="radar-wrapper">
+            <div class="timestamp" id="timestamp_rada_tamky"></div>
+            <img id="radar_rada_tamky" src="" alt="Radar Image" style="max-height:70vh;">
+        </div>
+        <img id="legend" src="rada_tamky/legend.png" alt="Legend" style="max-height:70vh;">
+    </div>
+</div>
+</div>
 <script>
-const images = [
-    ["rada/dong-ha-mon251118030004.MAX0287.jpg", "18/11/2025 03:00"],
-    ["rada/dong-ha-mon251118031004.MAX0288.jpg", "18/11/2025 03:10"],
-    ["rada/dong-ha-mon251118032005.MAX0289.jpg", "18/11/2025 03:20"],
-    ["rada/dong-ha-mon251118033004.MAX0290.jpg", "18/11/2025 03:30"],
-    ["rada/dong-ha-mon251118034005.MAX0291.jpg", "18/11/2025 03:40"],
+const images_rada_dongha = [
+["rada_dongha/dong-ha-mon251118021004.MAX0282.jpg", "18/11/2025 02:10"],
+["rada_dongha/dong-ha-mon251118022005.MAX0283.jpg", "18/11/2025 02:20"],
+["rada_dongha/dong-ha-mon251118023004.MAX0284.jpg", "18/11/2025 02:30"],
+["rada_dongha/dong-ha-mon251118024004.MAX0285.jpg", "18/11/2025 02:40"],
+["rada_dongha/dong-ha-mon251118025005.MAX0286.jpg", "18/11/2025 02:50"],
 ];
-let current = 0;
-let playing = true;
-let interval = setInterval(nextImage, 1000);
 
-function updateImage() {
-    document.getElementById("radar").src = images[current][0];
-    document.getElementById("timestamp").innerText = images[current][1];
-}
+let current_rada_dongha = 0;
+let playing_rada_dongha = true;
+let interval_rada_dongha = setInterval(()=>nextImage('rada_dongha'), 1000);
 
-function nextImage() {
-    current = (current + 1) % images.length;
-    updateImage();
+function updateImage(id) {
+  const imgs = eval("images_"+id);
+  const cur = eval("current_"+id);
+  document.getElementById("radar_"+id).src = imgs[cur][0];
+  document.getElementById("timestamp_"+id).innerText = imgs[cur][1];
 }
+function nextImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur+1) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function prevImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur-1+imgs.length) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function togglePlay(id) {
+  let playing = eval("playing_"+id);
+  if (playing) {
+    clearInterval(eval("interval_"+id));
+  } else {
+    eval("interval_"+id+"=setInterval(()=>nextImage(id),1000)");
+  }
+  eval("playing_"+id+"=!playing");
+}
+updateImage("rada_dongha");
+const images_rada_tamky = [
+["rada_tamky/tam-ky-mon251024025259.MAX2220.jpg", "24/10/2025 02:52"],
+["rada_tamky/tam-ky-mon251024030004.MAX2221.jpg", "24/10/2025 03:00"],
+["rada_tamky/tam-ky-mon251024030300.MAX2222.jpg", "24/10/2025 03:03"],
+["rada_tamky/tam-ky-mon251024031006.MAX2223.jpg", "24/10/2025 03:10"],
+["rada_tamky/tam-ky-mon251024031303.MAX2224.jpg", "24/10/2025 03:13"],
+];
 
-function prevImage() {
-    current = (current - 1 + images.length) % images.length;
-    updateImage();
-}
+let current_rada_tamky = 0;
+let playing_rada_tamky = true;
+let interval_rada_tamky = setInterval(()=>nextImage('rada_tamky'), 1000);
 
-function togglePlay() {
-    playing = !playing;
-    if (playing) {
-        interval = setInterval(nextImage, 1000);
-    } else {
-        clearInterval(interval);
-    }
+function updateImage(id) {
+  const imgs = eval("images_"+id);
+  const cur = eval("current_"+id);
+  document.getElementById("radar_"+id).src = imgs[cur][0];
+  document.getElementById("timestamp_"+id).innerText = imgs[cur][1];
 }
-
-function openFullscreen() {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-    }
+function nextImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur+1) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
 }
-updateImage();
+function prevImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur-1+imgs.length) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function togglePlay(id) {
+  let playing = eval("playing_"+id);
+  if (playing) {
+    clearInterval(eval("interval_"+id));
+  } else {
+    eval("interval_"+id+"=setInterval(()=>nextImage(id),1000)");
+  }
+  eval("playing_"+id+"=!playing");
+}
+updateImage("rada_tamky");
 </script>
-
-</body>
-</html>
+</body></html>
