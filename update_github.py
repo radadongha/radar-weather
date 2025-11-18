@@ -98,7 +98,24 @@ def has_changes():
     return result.stdout.strip() != ""
 if has_changes():
     print("🔄 Có thay đổi, tiến hành commit & push...")
-    subprocess.run(["git", "add", "."], check=True)
+    import subprocess
+
+    TOKEN = "ghp_11BU3A66Q0jomhXIfMsuyV_gaSnyhQqW6YxEDE4SWQNfy9996dU"  # token của bạn
+    BRANCH = "main"
+
+    # Lấy URL origin hiện tại
+    result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True)
+    origin_url = result.stdout.strip()
+
+    # Tạo URL tạm thời có token
+    if origin_url.startswith("https://"):
+        token_url = origin_url.replace("https://", f"https://{TOKEN}@")
+    else:
+        raise ValueError("Remote URL không phải HTTPS, script chỉ hỗ trợ HTTPS.")
+
+    # Push dùng token
+    subprocess.run(["git", "push", token_url, BRANCH], check=True)
+
     subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar Đông Hà & Tam Kỳ"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("✅ Đã commit & push lên GitHub.")
