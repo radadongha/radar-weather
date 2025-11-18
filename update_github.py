@@ -93,6 +93,18 @@ for radar_name, cfg in RADARS.items():
         if f not in keep_files:
             os.remove(f)
 
+def has_changes():
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    return result.stdout.strip() != ""
+if has_changes():
+    print("🔄 Có thay đổi, tiến hành commit & push...")
+    subprocess.run(["git", "add", "."], check=True)
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar Đông Hà & Tam Kỳ"], check=True)
+    subprocess.run(["git", "push"], check=True)
+    print("✅ Đã commit & push lên GitHub.")
+else:
+    print("ℹ️ Không có thay đổi, bỏ qua commit.")
+
 # --- tạo index.html song song ---
 html = """<!DOCTYPE html>
 <html lang="vi">
