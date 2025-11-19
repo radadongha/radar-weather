@@ -1,4 +1,0 @@
-[02/11/2025 14:20:22.80] Script auto_send_zalo.py đã chạy 
-[02/11/2025 14:20:27.42] Script auto_send_zalo.py đã chạy 
-[02/11/2025 14:21:37.84] Script auto_send_zalo.py đã chạy 
-[02/11/2025 14:21:39.05] Script auto_send_zalo.py đã chạy 
