@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Radar Thời Tiết Đông Hà & Tam Kỳ</title>
+<meta http-equiv="refresh" content="600">
+<style>
+body {font-family: Arial; background:#000; color:#fff; margin:0;}
+.container {display:flex; justify-content:center; align-items:flex-start; gap:20px; padding:10px;}
+.radar-block {flex:1; text-align:center;}
+.image-container {display:flex; justify-content:center; align-items:center; max-width:95%; gap:5px;}
+.radar-wrapper {position:relative;}
+.timestamp {position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:4px 12px; border-radius:10px; font-size:16px;}
+#legend {max-height:90vh; margin:0 10px;}
+.controls {margin:10px; font-size:20px;}
+button {font-size:18px; padding:4px 8px; margin:0 3px; border-radius:6px; border:none; background:#333; color:#fff; cursor:pointer;}
+button:hover {background:#555;}
+</style>
+</head>
+<body>
+<h2 style="text-align:center;">🛰️ Ảnh Radar Đông Hà & Tam Kỳ</h2>
+<div class="container">
+
+<div class="radar-block">
+    <h3>Đông Hà</h3>
+    <div class="controls">
+        <button onclick="prevImage('rada_dongha')">⏮️</button>
+        <button onclick="togglePlay('rada_dongha')">⏯️</button>
+        <button onclick="nextImage('rada_dongha')">⏭️</button>
+        <button onclick="openFullscreen()">🖥️</button>
+    </div>
+    <div class="image-container">
+        <div class="radar-wrapper">
+            <div class="timestamp" id="timestamp_rada_dongha"></div>
+            <img id="radar_rada_dongha" src="" alt="Radar Image" style="max-height:70vh;">
+        </div>
+    </div>
+</div>
+<img id="legend" src="" alt="Legend">
+<div class="radar-block">
+    <h3>Tam Kỳ</h3>
+    <div class="controls">
+        <button onclick="prevImage('rada_tamky')">⏮️</button>
+        <button onclick="togglePlay('rada_tamky')">⏯️</button>
+        <button onclick="nextImage('rada_tamky')">⏭️</button>
+        <button onclick="openFullscreen()">🖥️</button>
+    </div>
+    <div class="image-container">
+        <div class="radar-wrapper">
+            <div class="timestamp" id="timestamp_rada_tamky"></div>
+            <img id="radar_rada_tamky" src="" alt="Radar Image" style="max-height:70vh;">
+        </div>
+    </div>
+</div>
+</div>
+<script>
+const images_rada_dongha = [
+["rada_dongha/dong-ha-mon251125035004.MAX1300.jpg", "25/11/2025 03:50"],
+["rada_dongha/dong-ha-mon251125040004.MAX1301.jpg", "25/11/2025 04:00"],
+["rada_dongha/dong-ha-mon251125041004.MAX1302.jpg", "25/11/2025 04:10"],
+["rada_dongha/dong-ha-mon251125042005.MAX1303.jpg", "25/11/2025 04:20"],
+["rada_dongha/dong-ha-mon251125043005.MAX1304.jpg", "25/11/2025 04:30"],
+];
+
+let current_rada_dongha = 0;
+let playing_rada_dongha = true;
+let interval_rada_dongha = setInterval(()=>nextImage('rada_dongha'), 1000);
+
+function updateImage(id) {
+  const imgs = eval("images_"+id);
+  const cur = eval("current_"+id);
+  document.getElementById("radar_"+id).src = imgs[cur][0];
+  document.getElementById("timestamp_"+id).innerText = imgs[cur][1];
+}
+function nextImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur+1) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function prevImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur-1+imgs.length) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function togglePlay(id) {
+  let playing = eval("playing_"+id);
+  if (playing) {
+    clearInterval(eval("interval_"+id));
+  } else {
+    eval("interval_"+id+"=setInterval(()=>nextImage(id),1000)");
+  }
+  eval("playing_"+id+"=!playing");
+}
+updateImage("rada_dongha");
+const images_rada_tamky = [
+];
+
+let current_rada_tamky = 0;
+let playing_rada_tamky = true;
+let interval_rada_tamky = setInterval(()=>nextImage('rada_tamky'), 1000);
+
+function updateImage(id) {
+  const imgs = eval("images_"+id);
+  const cur = eval("current_"+id);
+  document.getElementById("radar_"+id).src = imgs[cur][0];
+  document.getElementById("timestamp_"+id).innerText = imgs[cur][1];
+}
+function nextImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur+1) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function prevImage(id) {
+  const imgs = eval("images_"+id);
+  let cur = eval("current_"+id);
+  cur = (cur-1+imgs.length) % imgs.length;
+  eval("current_"+id+"=cur");
+  updateImage(id);
+}
+function togglePlay(id) {
+  let playing = eval("playing_"+id);
+  if (playing) {
+    clearInterval(eval("interval_"+id));
+  } else {
+    eval("interval_"+id+"=setInterval(()=>nextImage(id),1000)");
+  }
+  eval("playing_"+id+"=!playing");
+}
+updateImage("rada_tamky");
+</script>
+</body></html>

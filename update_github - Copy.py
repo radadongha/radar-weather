@@ -5,35 +5,56 @@ import datetime
 import subprocess
 from PIL import Image
 
-# === Cấu hình ===
+# --- cấu hình ---
 RADARS = {
-    "Đông Hà": {"source": "D:/WinSCP/RADA", "target": "rada_dongha"},
-    "Tam Kỳ": {"source": "D:/WinSCP/tamky/RADA", "target": "rada_tamky"}
+    "Đông Hà": {
+        "source": "D:/WinSCP/RADA",
+        "target": "rada_dongha"
+    },
+    "Tam Kỳ": {
+        "source": "D:/WinSCP/tamky/RADA",
+        "target": "rada_tamky"
+    }
 }
 HTML_FILE = "index.html"
 LEGEND_ORIGINAL = "legend_original.png"
 NUM_IMAGES = 5
 
-# --- Hàm trích xuất thời gian từ tên file ---
 def extract_datetime(filename):
-    import re
     name = os.path.basename(filename)
-    match = re.search(r"(\d{10,12})", name)
-    if not match:
-        return None
-    digits = match.group(1)
     try:
-        y = int(digits[0:2]) + 2000
-        m = int(digits[2:4])
-        d = int(digits[4:6])
-        h = int(digits[6:8])
-        mi = int(digits[8:10])
-        return datetime.datetime(y, m, d, h, mi)
+        # tìm chuỗi số dài >= 10 trong tên file
+        import re
+        match = re.search(r"(\d{10,12})", name)
+        if not match:
+            return None
+        digits = match.group(1)
+
+        # nếu có 12 số → YYMMDDHHMMSS
+        if len(digits) >= 12:
+            y = int(digits[0:2]) + 2000
+            m = int(digits[2:4])
+            d = int(digits[4:6])
+            h = int(digits[6:8])
+            mi = int(digits[8:10])
+            # giây có thể có hoặc không
+            return datetime.datetime(y, m, d, h, mi)
+        # nếu chỉ có 10 số → YYMMDDHHMM
+        elif len(digits) == 10:
+            y = int(digits[0:2]) + 2000
+            m = int(digits[2:4])
+            d = int(digits[4:6])
+            h = int(digits[6:8])
+            mi = int(digits[8:10])
+            return datetime.datetime(y, m, d, h, mi)
+        else:
+            return None
     except:
         return None
 
-# --- Resize legend ---
+
 def resize_legend(input_path, output_path, scale=0.7):
+    """Resize thang màu"""
     try:
         img = Image.open(input_path)
         new_size = (int(img.width * scale), int(img.height * scale))
@@ -43,16 +64,20 @@ def resize_legend(input_path, output_path, scale=0.7):
     except Exception as e:
         print(f"❌ Lỗi resize legend {output_path}: {e}")
 
-# --- Xử lý từng radar ---
+# --- xử lý từng radar ---
 all_infos = {}
 for radar_name, cfg in RADARS.items():
     os.makedirs(cfg["target"], exist_ok=True)
+
+    # Resize legend
     legend_out = os.path.join(cfg["target"], "legend.png")
     if os.path.exists(LEGEND_ORIGINAL):
         resize_legend(LEGEND_ORIGINAL, legend_out)
+
     # Lấy ảnh mới nhất
     all_images = sorted(glob.glob(os.path.join(cfg["source"], "*.jpg")), reverse=True)
     selected = all_images[:NUM_IMAGES]
+
     infos = []
     for src in reversed(selected):
         dst = os.path.join(cfg["target"], os.path.basename(src))
@@ -61,13 +86,43 @@ for radar_name, cfg in RADARS.items():
         if dt:
             infos.append((os.path.basename(dst), dt.strftime("%d/%m/%Y %H:%M")))
     all_infos[radar_name] = (cfg["target"], infos)
+
     # Dọn ảnh cũ
     keep_files = [os.path.join(cfg["target"], f) for f, _ in infos]
     for f in glob.glob(os.path.join(cfg["target"], "*.jpg")):
         if f not in keep_files:
             os.remove(f)
 
-# --- Tạo index.html ---
+def has_changes():
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    return result.stdout.strip() != ""
+if has_changes():
+    print("🔄 Có thay đổi, tiến hành commit & push...")
+    import subprocess
+
+    TOKEN = "ghp_11BU3A66Q0jomhXIfMsuyV_gaSnyhQqW6YxEDE4SWQNfy9996dU"  # token của bạn
+    BRANCH = "main"
+
+    # Lấy URL origin hiện tại
+    result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True)
+    origin_url = result.stdout.strip()
+
+    # Tạo URL tạm thời có token
+    if origin_url.startswith("https://"):
+        token_url = origin_url.replace("https://", f"https://{TOKEN}@")
+    else:
+        raise ValueError("Remote URL không phải HTTPS, script chỉ hỗ trợ HTTPS.")
+
+    # Push dùng token
+    subprocess.run(["git", "push", token_url, BRANCH], check=True)
+
+    subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar Đông Hà & Tam Kỳ"], check=True)
+    subprocess.run(["git", "push"], check=True)
+    print("✅ Đã commit & push lên GitHub.")
+else:
+    print("ℹ️ Không có thay đổi, bỏ qua commit.")
+
+# --- tạo index.html song song ---
 html = """<!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -76,12 +131,12 @@ html = """<!DOCTYPE html>
 <meta http-equiv="refresh" content="600">
 <style>
 body {font-family: Arial; background:#000; color:#fff; margin:0;}
-.container {display:flex; justify-content:center; align-items:flex-start; gap:20px; padding:10px;}
+.container {display:flex; justify-content:space-around; align-items:flex-start; gap:20px; padding:10px;}
 .radar-block {flex:1; text-align:center;}
 .image-container {display:flex; justify-content:center; align-items:center; max-width:95%; gap:5px;}
 .radar-wrapper {position:relative;}
 .timestamp {position:absolute; top:10px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); padding:4px 12px; border-radius:10px; font-size:16px;}
-#legend {max-height:90vh; margin:0 10px;}
+#legend {max-height:90vh;}
 .controls {margin:10px; font-size:20px;}
 button {font-size:18px; padding:4px 8px; margin:0 3px; border-radius:6px; border:none; background:#333; color:#fff; cursor:pointer;}
 button:hover {background:#555;}
@@ -92,46 +147,25 @@ button:hover {background:#555;}
 <div class="container">
 """
 
-# Thêm radar và legend vào giữa
-radar_names = list(all_infos.keys())
-if len(radar_names) == 2:
-    radar1, radar2 = radar_names
-    t1, infos1 = all_infos[radar1]
-    t2, infos2 = all_infos[radar2]
-    legend_path = os.path.join(t1, "legend.png") if os.path.exists(os.path.join(t1, "legend.png")) else ""
-    html += f"""
-<div class="radar-block">
-    <h3>{radar1}</h3>
+for radar_name, (target, infos) in all_infos.items():
+    html += f"""<div class="radar-block">
+    <h3>{radar_name}</h3>
     <div class="controls">
-        <button onclick="prevImage('{t1}')">⏮️</button>
-        <button onclick="togglePlay('{t1}')">⏯️</button>
-        <button onclick="nextImage('{t1}')">⏭️</button>
+        <button onclick="prevImage('{target}')">⏮️</button>
+        <button onclick="togglePlay('{target}')">⏯️</button>
+        <button onclick="nextImage('{target}')">⏭️</button>
         <button onclick="openFullscreen()">🖥️</button>
     </div>
     <div class="image-container">
         <div class="radar-wrapper">
-            <div class="timestamp" id="timestamp_{t1}"></div>
-            <img id="radar_{t1}" src="" alt="Radar Image" style="max-height:70vh;">
+            <div class="timestamp" id="timestamp_{target}"></div>
+            <img id="radar_{target}" src="" alt="Radar Image" style="max-height:70vh;">
         </div>
-    </div>
-</div>
-<img id="legend" src="{legend_path}" alt="Legend">
-<div class="radar-block">
-    <h3>{radar2}</h3>
-    <div class="controls">
-        <button onclick="prevImage('{t2}')">⏮️</button>
-        <button onclick="togglePlay('{t2}')">⏯️</button>
-        <button onclick="nextImage('{t2}')">⏭️</button>
-        <button onclick="openFullscreen()">🖥️</button>
-    </div>
-    <div class="image-container">
-        <div class="radar-wrapper">
-            <div class="timestamp" id="timestamp_{t2}"></div>
-            <img id="radar_{t2}" src="" alt="Radar Image" style="max-height:70vh;">
-        </div>
+        <img id="legend" src="{target}/legend.png" alt="Legend" style="max-height:70vh;">
     </div>
 </div>
 """
+
 html += "</div>\n"
 
 # --- JS cho cả 2 radar ---
@@ -181,26 +215,20 @@ html += "</script>\n</body></html>"
 
 with open(HTML_FILE,"w",encoding="utf-8") as f:
     f.write(html)
-print("✅ Đã tạo index.html với legend ở giữa 2 radar.")
+
+print("✅ Đã tạo index.html song song cho Đông Hà & Tam Kỳ.")
 
 # --- Git commit & push ---
-def git_commit_push(token, branch="main"):
-    # Lấy URL origin
-    result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True)
-    origin_url = result.stdout.strip()
-    if not origin_url.startswith("https://"):
-        raise ValueError("Remote URL phải là HTTPS.")
-    token_url = origin_url.replace("https://", f"https://{token}@")
+def run_git(cmd):
+    return subprocess.run(["git"] + cmd, cwd=os.path.dirname(os.path.abspath(__file__)), text=True, capture_output=True)
+
+def safe_git_commit():
     try:
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(["git", "commit", "-m", "🛰️ Cập nhật ảnh radar Đông Hà & Tam Kỳ"], check=True)
-        subprocess.run(["git", "push", token_url, branch], check=True)
-        print("✅ Đã commit & push lên GitHub với token.")
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+        print("✅ Đã commit & push lên GitHub")
     except subprocess.CalledProcessError as e:
         print("❌ Lỗi Git:", e)
 
-TOKEN = os.getenv("GITHUB_TOKEN")
-if TOKEN:
-    git_commit_push(TOKEN)
-else:
-    print("ℹ️ Không tìm thấy GITHUB_TOKEN, bỏ qua push.")
+safe_git_commit()
